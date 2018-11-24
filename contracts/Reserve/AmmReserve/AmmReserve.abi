@@ -1,0 +1,149 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Sat Nov 24 22:15:12 2018",
+    "version": "eosio::abi/1.0",
+    "structs": [
+        {
+            "name": "disabletrade",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "enabletrade",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "getconvrate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "src",
+                    "type": "asset"
+                },
+                {
+                    "name": "dest",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "params",
+            "base": "",
+            "fields": [
+                {
+                    "name": "manager",
+                    "type": "name"
+                },
+                {
+                    "name": "token_asset",
+                    "type": "asset"
+                },
+                {
+                    "name": "token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "eos_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "r",
+                    "type": "float32"
+                },
+                {
+                    "name": "p_min",
+                    "type": "float32"
+                },
+                {
+                    "name": "trade_enabled",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "rate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "manager",
+                    "type": "name"
+                },
+                {
+                    "name": "stored_rate",
+                    "type": "float32"
+                },
+                {
+                    "name": "dest_amount",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "setparams",
+            "base": "",
+            "fields": [
+                {
+                    "name": "r",
+                    "type": "float32"
+                },
+                {
+                    "name": "p_min",
+                    "type": "float32"
+                },
+                {
+                    "name": "token_asset",
+                    "type": "asset"
+                },
+                {
+                    "name": "token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "eos_contract",
+                    "type": "name"
+                }
+            ]
+        }
+    ],
+    "types": [],
+    "actions": [
+        {
+            "name": "disabletrade",
+            "type": "disabletrade",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "enabletrade",
+            "type": "enabletrade",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "getconvrate",
+            "type": "getconvrate",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setparams",
+            "type": "setparams",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "params",
+            "type": "params",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "rate",
+            "type": "rate",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "ricardian_clauses": [],
+    "abi_extensions": []
+}

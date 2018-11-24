@@ -1,0 +1,272 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Sat Nov 24 21:21:57 2018",
+    "version": "eosio::abi/1.0",
+    "structs": [
+        {
+            "name": "addreserve",
+            "base": "",
+            "fields": [
+                {
+                    "name": "reserve",
+                    "type": "name"
+                },
+                {
+                    "name": "add",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "listpairres",
+            "base": "",
+            "fields": [
+                {
+                    "name": "reserve",
+                    "type": "name"
+                },
+                {
+                    "name": "token_asset",
+                    "type": "asset"
+                },
+                {
+                    "name": "token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "eos_to_token",
+                    "type": "bool"
+                },
+                {
+                    "name": "token_to_eos",
+                    "type": "bool"
+                },
+                {
+                    "name": "add",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "memo_trade_structure",
+            "base": "",
+            "fields": [
+                {
+                    "name": "trader",
+                    "type": "name"
+                },
+                {
+                    "name": "src_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "src_asset",
+                    "type": "asset"
+                },
+                {
+                    "name": "dest_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "dest_asset",
+                    "type": "asset"
+                },
+                {
+                    "name": "dest_account",
+                    "type": "name"
+                },
+                {
+                    "name": "max_dest_amount",
+                    "type": "uint64"
+                },
+                {
+                    "name": "min_conversion_rate",
+                    "type": "float32"
+                },
+                {
+                    "name": "walletId",
+                    "type": "name"
+                },
+                {
+                    "name": "hint",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "reserve",
+            "base": "",
+            "fields": [
+                {
+                    "name": "contract",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "reservespert",
+            "base": "",
+            "fields": [
+                {
+                    "name": "symbol",
+                    "type": "uint64"
+                },
+                {
+                    "name": "token_contract",
+                    "type": "uint64"
+                },
+                {
+                    "name": "reserve_contracts",
+                    "type": "uint64[]"
+                },
+                {
+                    "name": "num_reserves",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "setenable",
+            "base": "",
+            "fields": [
+                {
+                    "name": "enable",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "state",
+            "base": "",
+            "fields": [
+                {
+                    "name": "manager",
+                    "type": "name"
+                },
+                {
+                    "name": "is_enabled",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "trade1",
+            "base": "",
+            "fields": [
+                {
+                    "name": "reserve",
+                    "type": "name"
+                },
+                {
+                    "name": "memo_struct",
+                    "type": "memo_trade_structure"
+                }
+            ]
+        },
+        {
+            "name": "trade2",
+            "base": "",
+            "fields": [
+                {
+                    "name": "reserve",
+                    "type": "name"
+                },
+                {
+                    "name": "memo_struct",
+                    "type": "memo_trade_structure"
+                },
+                {
+                    "name": "actual_src_asset",
+                    "type": "asset"
+                },
+                {
+                    "name": "actual_dest_asset",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "trade3",
+            "base": "",
+            "fields": [
+                {
+                    "name": "reserve",
+                    "type": "name"
+                },
+                {
+                    "name": "memo_struct",
+                    "type": "memo_trade_structure"
+                },
+                {
+                    "name": "actual_src_asset",
+                    "type": "asset"
+                },
+                {
+                    "name": "actual_dest_asset",
+                    "type": "asset"
+                },
+                {
+                    "name": "dest_asset_before_trade",
+                    "type": "asset"
+                }
+            ]
+        }
+    ],
+    "types": [],
+    "actions": [
+        {
+            "name": "addreserve",
+            "type": "addreserve",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "listpairres",
+            "type": "listpairres",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setenable",
+            "type": "setenable",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "trade1",
+            "type": "trade1",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "trade2",
+            "type": "trade2",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "trade3",
+            "type": "trade3",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "reserve",
+            "type": "reserve",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "reservespert",
+            "type": "reservespert",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "state",
+            "type": "state",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "ricardian_clauses": [],
+    "abi_extensions": []
+}

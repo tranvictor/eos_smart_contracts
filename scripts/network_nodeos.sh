@@ -23,8 +23,8 @@ cleos push action eosio.token issue '[ "network", "10.0000 SYS", "memo" ]' -p eo
 cleos set account permission network active "{\"threshold\": 1, \"keys\":[{\"key\":\"$PUBLIC_KEY\", \"weight\":1}] , \"accounts\":[{\"permission\":{\"actor\":\"network\",\"permission\":\"eosio.code\"},\"weight\":1}], \"waits\":[] }" owner -p network
 cd contracts/Network/
 
-#tmp disable
-#eosio-cpp -o Network.wasm Network.cpp --abigen
+#disable to skip compilation:
+eosio-cpp -o Network.wasm Network.cpp --abigen
 
 #fix abi file since in current version of abigen vectors are not processed correctly
 sed -i -e 's/vector<account_name>/uint64[]/g' Network.abi
@@ -48,5 +48,4 @@ cleos get table network network reservespert
 
 cleos get table reserve reserve rate
 cleos push action eosio.token transfer '[ "alice", "network", "0.0100 SYS", "alice,eosio.token,4 SYS,eosio.token,4 EOS,moshe,20,0.000001,some_wallet_id,some_hint" ]' -p alice@active
-#cleos push action eosio.token transfer '[ "alice", "network", "0.0100 SYS", "alice,eosio.token,4 SYS,eosio.token,4 EOS,moshe,2,2,e,f" ]' -p alice@active
 cleos get table reserve reserve rate

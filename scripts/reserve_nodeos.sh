@@ -15,7 +15,7 @@ cleos create account eosio reserve $PUBLIC_KEY
 #deploy token with eosio development key
 cleos create account eosio eosio.token EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 #disable to skip compilation
-cd contracts/Token/ ; eosio-cpp -o eosio.token.wasm eosio.token.cpp --abigen; cd ../../
+#cd contracts/Token/ ; eosio-cpp -o eosio.token.wasm eosio.token.cpp --abigen; cd ../../
 cleos set contract eosio.token contracts/Token eosio.token.wasm --abi eosio.token.abi -p eosio.token@active
 cleos push action eosio.token create '[ "eosio", "1000000000.0000 SYS"]' -p eosio.token@active
 cleos push action eosio.token issue '[ "alice", "100.0000 SYS", "memo" ]' -p eosio@active
@@ -28,7 +28,7 @@ cleos push action eosio.token issue '[ "reserve", "70.0000 EOS", "memo" ]' -p eo
 #deploy reserve
 cleos set account permission reserve active "{\"threshold\": 1, \"keys\":[{\"key\":\"$PUBLIC_KEY\", \"weight\":1}] , \"accounts\":[{\"permission\":{\"actor\":\"reserve\",\"permission\":\"eosio.code\"},\"weight\":1}], \"waits\":[] }" owner -p reserve
 #disable to skip compilation:
-cd contracts/Reserve/AmmReserve ; eosio-cpp -o AmmReserve.wasm AmmReserve.cpp --abigen ; cd ../../..
+#cd contracts/Reserve/AmmReserve ; eosio-cpp -o AmmReserve.wasm AmmReserve.cpp --abigen ; cd ../../..
 cleos set contract reserve contracts/Reserve/AmmReserve AmmReserve.wasm -p reserve@active
 cleos push action reserve setparams '[ "0.01", "0.05", "0.0000 SYS", "eosio.token", "eosio.token" ]' -p reserve@active
 cleos push action reserve enabletrade '[ ]' -p reserve@active

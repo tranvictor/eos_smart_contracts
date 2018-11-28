@@ -24,7 +24,7 @@ cleos set account permission network active "{\"threshold\": 1, \"keys\":[{\"key
 cd contracts/Network/
 
 #disable to skip compilation:
-eosio-cpp -o Network.wasm Network.cpp --abigen
+#eosio-cpp -o Network.wasm Network.cpp --abigen
 
 #fix abi file since in current version of abigen vectors are not processed correctly
 sed -i -e 's/vector<account_name>/uint64[]/g' Network.abi

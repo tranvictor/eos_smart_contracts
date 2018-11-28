@@ -4,6 +4,7 @@
 #include <eosiolib/asset.hpp>
 #include <eosiolib/symbol.hpp>
 
+#include <math.h>
 #include <string>
 #include <vector>
 
@@ -12,6 +13,8 @@ using std::vector;
 using namespace eosio;
 
 #define EOS_SYMBOL S(4, EOS)
+#define MAX_RATE = 100000 /* up to 1M tokens per EOS */
+#define MAX_QTY = pow(10,28); /* 10B tokens */
 
 struct transfer {
     account_name from;

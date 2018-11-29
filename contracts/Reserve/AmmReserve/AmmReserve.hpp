@@ -8,16 +8,6 @@
 struct reserve_memo_trade_structure {
     account_name dest_address;
     double       conversion_rate;
-
-    account_name    src_contract; /* TODO: potentially read from storage sine pair is listed. */
-    asset           src_asset;
-    account_name    dest_contract; /* TODO: potentially read from storage sine pair is listed. */
-    asset           dest_asset;
-    account_name    dest_account;
-    uint64_t        max_dest_amount;
-    float           min_conversion_rate;
-    account_name    walletId;
-    std::string     hint; /* TODO: should hint be another type? */
 };
 
 class AmmReserve : public contract {
@@ -77,7 +67,7 @@ class AmmReserve : public contract {
                   asset        token_asset,
                   account_name token_contract,
                   account_name eos_contract,
-                  bool         trade_enabled);
+                  bool         enable_trade);
 
         [[eosio::action]]
         void setparams(double r,
@@ -101,7 +91,7 @@ class AmmReserve : public contract {
         void resetfee();
 
         [[eosio::action]]
-        void getconvrate(asset src, asset dest);
+        void getconvrate(asset src);
 
         void apply(const account_name contract, const account_name act);
 
@@ -113,27 +103,19 @@ class AmmReserve : public contract {
         state_type  state_instance;
 
         double reserve_get_conv_rate(asset      src,
-                                     asset      dest,
                                      double     &rate,
                                      uint64_t   &dst_amount);
 
         double liquidity_get_rate(const struct state &current_state,
                                   const struct params &current_params,
-                                  asset token,
                                   bool is_buy,
                                   asset src_asset);
 
 
         double get_rate_with_e(const struct params &current_params,
-                               asset token,
                                bool is_buy,
                                asset src_asset,
                                double e);
-
-        double calc_dst_amount(double rate,
-                               uint64_t src_precision,
-                               uint64_t src_amount,
-                               uint64_t dest_precision);
 
         double rate_after_validation(const struct params &current_params,
                                      double rate,
@@ -143,12 +125,12 @@ class AmmReserve : public contract {
 
         double buy_rate_zero_quantity(const struct params &current_params, double e);
 
-        double sell_rate(const struct params &current_params,
-                         double e,
-                         double sell_input_qty,
-                         double delta_t,
-                         double &rate,
-                         double &delta_e);
+        void sell_rate(const struct params &current_params,
+                       double e,
+                       double sell_input_qty,
+                       double delta_t,
+                       double &rate,
+                       double &delta_e);
 
         double sell_rate_zero_quantity(const struct params &current_params, double e);
 
@@ -159,8 +141,6 @@ class AmmReserve : public contract {
         double delta_t_func(const struct params &current_params, double e, double delta_e);
 
         double delta_e_func(const struct params &current_params, double e, double delta_t);
-
-        double asset_to_double_amount(asset quantity);
 
         void reserve_trade(const struct transfer &transfer, const account_name code);
 
@@ -177,6 +157,5 @@ class AmmReserve : public contract {
                               bool buy);
 
         reserve_memo_trade_structure parse_memo(std::string memo);
-
 };
 

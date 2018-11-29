@@ -6,7 +6,7 @@ void AmmReserve::init(account_name network_contract,
                       asset        token_asset,
                       account_name token_contract,
                       account_name eos_contract,
-                      bool         trade_enabled) {
+                      bool         enable_trade) {
 
     require_auth( _self );
 
@@ -14,11 +14,12 @@ void AmmReserve::init(account_name network_contract,
     eosio_assert(itr == state_instance.end(), "init already called");
 
     state_instance.emplace(_self, [&](auto& s) {
+        s.manager = _self;
         s.network_contract = network_contract;
         s.token_asset = token_asset;
         s.token_contract = token_contract;
         s.eos_contract = eos_contract;
-        s.trade_enabled = trade_enabled;
+        s.trade_enabled = enable_trade;
         s.collected_fees_in_tokens = token_asset;
         s.collected_fees_in_tokens.amount = 0;
     });
@@ -52,6 +53,7 @@ void AmmReserve::setparams(double r,
         });
     } else {
         params_instance.emplace(_self, [&](auto& s) {
+            s.manager = _self;
             s.r = r;
             s.p_min = p_min;
             s.max_eos_cap_buy = max_eos_cap_buy;
@@ -109,12 +111,12 @@ void AmmReserve::resetfee() {
     });
 }
 
-void AmmReserve::getconvrate(asset src, asset dest) {
+void AmmReserve::getconvrate(asset src) {
 
     double rate;
     uint64_t dst_amount;
 
-    reserve_get_conv_rate(src, dest, rate, dst_amount);
+    reserve_get_conv_rate(src, rate, dst_amount);
     if(rate == 0) dst_amount = 0;
 
     auto itr = rate_instance.find(_self);
@@ -133,11 +135,8 @@ void AmmReserve::getconvrate(asset src, asset dest) {
 }
 
 double AmmReserve::reserve_get_conv_rate(asset      src,
-                                         asset      dest,
                                          double     &rate,
                                          uint64_t   &dst_amount) {
-    asset token;
-    bool is_buy;
 
     /* verify contract was init */
     auto state_ptr = state_instance.find(_self);
@@ -152,25 +151,18 @@ double AmmReserve::reserve_get_conv_rate(asset      src,
     /* we only allow network to get conv rate since it actually writes to ram */
     require_auth(state_ptr->network_contract);
 
-    if (!state_ptr->trade_enabled) return 0;
+    if (!current_state.trade_enabled) return 0;
 
-    if (EOS_SYMBOL == src.symbol) {
-        is_buy = true;
-        token = dest;
-    } else if (EOS_SYMBOL == dest.symbol) {
-        is_buy = false;
-        token = src;
-    } else {
-        return 0;
-    }
+    bool is_buy = (EOS_SYMBOL == src.symbol) ? true : false;
+    uint64_t dest_precision = is_buy ? EOS_PRECISION : current_state.token_asset.symbol.precision();
 
-    rate = liquidity_get_rate(current_state, current_params, token, is_buy, src);
+    rate = liquidity_get_rate(current_state, current_params, is_buy, src);
     if (rate == 0) return 0;
 
     dst_amount = calc_dst_amount(rate,
                                  src.symbol.precision(),
                                  src.amount,
-                                 dest.symbol.precision());
+                                 dest_precision);
 
     asset this_dest_balance = get_balance(_self,
                                           state_ptr->token_contract,
@@ -182,23 +174,19 @@ double AmmReserve::reserve_get_conv_rate(asset      src,
 
 double AmmReserve::liquidity_get_rate(const struct state &current_state,
                                       const struct params &current_params,
-                                      asset token,
                                       bool is_buy,
                                       asset src_asset) {
 
     /* require(qtyInSrcWei <= MAX_QTY); */
 
     asset eos_balance = get_balance(_self, current_state.eos_contract, EOS_SYMBOL);
-    double e = asset_to_double_amount(eos_balance);
-    double rate = get_rate_with_e(current_params, token, is_buy, src_asset, e);
+    double e = asset_to_damount(eos_balance);
+    double rate = get_rate_with_e(current_params, is_buy, src_asset, e);
 
-    /* TODO: following also appears in rate_after_validation, can remove from one of them */
-    if (rate < MAX_RATE) return 0;
     return rate;
 }
 
 double AmmReserve::get_rate_with_e(const struct params &current_params,
-                                   asset token,
                                    bool is_buy,
                                    asset src_asset,
                                    double e) {
@@ -207,12 +195,11 @@ double AmmReserve::get_rate_with_e(const struct params &current_params,
     double sell_input_qty;
     double delta_t;
 
-    double qty_in_src = asset_to_double_amount(src_asset);
+    double qty_in_src = asset_to_damount(src_asset);
     double rate;
 
     if (is_buy) {
         /* EOS goes in, token goes out */
-
         delta_e = qty_in_src;
         if (src_asset.amount > current_params.max_eos_cap_buy.amount) return 0;
 
@@ -238,17 +225,6 @@ double AmmReserve::get_rate_with_e(const struct params &current_params,
     return rate_after_validation(current_params, rate, is_buy);
 }
 
-/* TODO: not sure this is correct, also consider moving to common place */
-double AmmReserve::calc_dst_amount(double rate,
-                                   uint64_t src_precision,
-                                   uint64_t src_amount,
-                                   uint64_t dest_precision) {
-
-    return double(src_amount * pow(10,dest_precision)) /
-           (rate * pow(10,src_amount));
-}
-
-
 double AmmReserve::rate_after_validation(const struct params &current_params,
                                          double rate,
                                          bool buy) {
@@ -273,6 +249,7 @@ double AmmReserve::rate_after_validation(const struct params &current_params,
 }
 
 double AmmReserve::buy_rate(const struct params &current_params, double e, double delta_e) {
+
     double delta_t = delta_t_func(current_params, e, delta_e);
     /* require(deltaTInFp <= maxQtyInFp); */
     delta_t = value_after_reducing_fee(current_params, delta_t);
@@ -284,16 +261,16 @@ double AmmReserve::buy_rate_zero_quantity(const struct params &current_params, d
     return value_after_reducing_fee(current_params, rate_pre_reduction);
 }
 
-double AmmReserve::sell_rate(const struct params &current_params,
-                             double e,
-                             double sell_input_qty,
-                             double delta_t,
-                             double &rate,
-                             double &delta_e) {
+void AmmReserve::sell_rate(const struct params &current_params,
+                           double e,
+                           double sell_input_qty,
+                           double delta_t,
+                           double &rate,
+                           double &delta_e) {
 
     delta_e = delta_e_func(current_params, e, delta_t);
     /* require(deltaEInFp <= maxQtyInFp); */
-    return delta_e / sell_input_qty;
+    rate =  delta_e / sell_input_qty;
 }
 
 double AmmReserve::sell_rate_zero_quantity(const struct params &current_params, double e) {
@@ -311,17 +288,13 @@ double AmmReserve::p_of_e(const struct params &current_params, double e) {
 }
 
 double AmmReserve::delta_t_func(const struct params &current_params, double e, double delta_e) {
-    return (exp(-current_params.r * delta_e) - 1.0) / (current_params.r * p_of_e(current_params, e));
+    return (-1) *
+           ((exp(-current_params.r * delta_e) - 1.0) / (current_params.r * p_of_e(current_params, e)));
 }
 
 double AmmReserve::delta_e_func(const struct params &current_params, double e, double delta_t) {
-    return (-1) *
-           (log(1 + current_params.r * p_of_e(current_params, e) * delta_t)) /
-           current_params.r;
-}
-
-double AmmReserve::asset_to_double_amount(asset quantity) {
-    return quantity.amount / pow(10,quantity.symbol.precision());
+    return (1) *
+           ((log(1 + current_params.r * p_of_e(current_params, e) * delta_t)) / current_params.r);
 }
 
 void AmmReserve::reserve_trade(const struct transfer &transfer, const account_name code) {
@@ -332,7 +305,7 @@ void AmmReserve::reserve_trade(const struct transfer &transfer, const account_na
     eosio_assert(state_ptr != state_instance.end(), "init was not called");
     const auto& state = *state_ptr;
 
-    require_auth(state.network_contract);
+    eosio_assert(transfer.from == state.network_contract, "trade can only come from contract");
 
     auto current_params_ptr = params_instance.find(_self);
     eosio_assert(current_params_ptr != params_instance.end(), "params were not set");
@@ -342,7 +315,7 @@ void AmmReserve::reserve_trade(const struct transfer &transfer, const account_na
     eosio_assert(transfer.quantity.is_valid(), "invalid transfer");
     eosio_assert(state.trade_enabled, "trade is not enabled");
 
-    eosio_assert(transfer.memo.length() == 2, "needs a memo");
+    eosio_assert(transfer.memo.length() > 0 , "needs a memo");
     auto parsed_memo = parse_memo(transfer.memo);
 
     eosio_assert(transfer.quantity.symbol == EOS_SYMBOL ||
@@ -399,23 +372,24 @@ void AmmReserve::do_trade(const struct state &state,
 
 void AmmReserve::record_imbalance(const struct params &current_params,
                                   asset token,
-                                  bool buy) { /* TODO: implement in calling function */
+                                  bool buy) {
 
     /* require(val <= MAX_QTY); */
 
-    // TODO: not sure below is correct
-    uint64_t current_fees_in_tokens;
+    double dfees;
+    double token_damount = amount_to_damount(token.amount, token.symbol.precision());
+    uint64_t fees_amount;
 
     if (buy) {
-        current_fees_in_tokens = uint64_t((token.amount) * current_params.fee_percent /
-                                          (100.0 - current_params.fee_percent));
+        dfees = (token_damount * current_params.fee_percent / (100.0 - current_params.fee_percent));
     } else {
-        current_fees_in_tokens = uint64_t((token.amount) * current_params.fee_percent / 100.0);
+        dfees = (token_damount * current_params.fee_percent) / 100.0;
     }
+    fees_amount = damount_to_amount(dfees, token.symbol.precision());
 
     auto itr = state_instance.find(_self);
     state_instance.modify(itr, _self, [&](auto& s) {
-        s.collected_fees_in_tokens.amount = current_fees_in_tokens;
+        s.collected_fees_in_tokens.amount = fees_amount;
     });
 }
 
@@ -440,7 +414,7 @@ void AmmReserve::apply(const account_name contract, const account_name act) {
     auto &thiscontract = *this;
 
     switch (act) {
-        EOSIO_API(AmmReserve, (setparams)(getconvrate))
+        EOSIO_API(AmmReserve, (init)(setparams)(setnetwork)(enabletrade)(disabletrade)(resetfee)(getconvrate))
     };
 }
 

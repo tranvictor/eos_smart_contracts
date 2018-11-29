@@ -12,7 +12,8 @@ using std::string;
 using std::vector;
 using namespace eosio;
 
-#define EOS_SYMBOL S(4, EOS)
+#define EOS_PRECISION 4
+#define EOS_SYMBOL S(EOS_PRECISION, EOS)
 #define MAX_RATE 100000 /* up to 1M tokens per EOS */
 //#define MAX_QTY pow(10,28); /* 10B tokens */
 
@@ -96,3 +97,28 @@ float stof(const char* s) {
 
     return rez * fact;
 };
+
+
+double amount_to_damount(uint64_t amount, uint64_t precision) {
+    return (amount / double(pow(10, precision)));
+}
+
+uint64_t damount_to_amount(double damount, uint64_t precision) {
+    return uint64_t(damount * double(pow(10, precision)));
+}
+
+double asset_to_damount(asset quantity) {
+    return (quantity.amount / double(pow(10, quantity.symbol.precision())));
+}
+
+uint64_t calc_dst_amount(double rate,
+                         uint64_t src_precision,
+                         uint64_t src_amount,
+                         uint64_t dest_precision) {
+
+    double src_damount = amount_to_damount(src_amount, src_precision);
+    double dst_damount = src_damount * rate;
+    uint64_t dst_amount = damount_to_amount(dst_damount, dest_precision);
+
+    return dst_amount;
+}

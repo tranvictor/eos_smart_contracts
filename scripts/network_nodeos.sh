@@ -11,7 +11,6 @@ set -x
 
 PUBLIC_KEY=EOS5CYr5DvRPZvfpsUGrQ2SnHeywQn66iSbKKXn4JDTbFFr36TRTX
 cleos create account eosio moshe $PUBLIC_KEY
-cleos create account eosio network $PUBLIC_KEY
 cleos create account eosio reserve1 $PUBLIC_KEY
 cleos create account eosio reserve2 $PUBLIC_KEY
 cleos create account eosio reserve3 $PUBLIC_KEY

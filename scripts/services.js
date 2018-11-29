@@ -11,7 +11,7 @@ module.exports.networkAccount = tokenAccount
 
 /////////// exported function function /////////// 
 
-module.exports.getMatchingAmount = async function(eos, srcSymbol, dstSymbol, amount) {
+module.exports.getMatchingAmount = async function(eos, srcSymbol, destSymbol, amount) {
     if (amount == 0) {
         return -1;
     }
@@ -39,7 +39,7 @@ module.exports.getUserBalance = async function(eos, account, symbol){
     return parseFloat(balanceRes[0]);
 }
 
-module.exports.getRate = async function(eos, srcSymbol, dstSymbol, srcAmount) {
+module.exports.getRate = async function(eos, srcSymbol, destSymbol, srcAmount) {
 
     let params = await getParams(eos);
     let r = parseFloat(params["rows"][0]["r"]);

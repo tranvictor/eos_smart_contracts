@@ -53,10 +53,10 @@ asset get_balance(account_name user, account_name token_contract, symbol_type sy
     return userAcc.balance;
 }
 
-void send(account_name from, account_name to, asset quantity, account_name dst_contract) {
+void send(account_name from, account_name to, asset quantity, account_name dest_contract) {
     action {
         permission_level{from, N(active)},
-        dst_contract,
+        dest_contract,
         N(transfer),
         std::make_tuple(from, to, quantity, std::string("memo"))
     }.send();
@@ -100,7 +100,6 @@ float stof(const char* s) {
     return rez * fact;
 };
 
-
 double amount_to_damount(uint64_t amount, uint64_t precision) {
     return (amount / double(pow(10, precision)));
 }
@@ -113,14 +112,14 @@ double asset_to_damount(asset quantity) {
     return (quantity.amount / double(pow(10, quantity.symbol.precision())));
 }
 
-uint64_t calc_dst_amount(double rate,
-                         uint64_t src_precision,
-                         uint64_t src_amount,
-                         uint64_t dest_precision) {
+uint64_t calc_dest_amount(double rate,
+                          uint64_t src_precision,
+                          uint64_t src_amount,
+                          uint64_t dest_precision) {
 
     double src_damount = amount_to_damount(src_amount, src_precision);
-    double dst_damount = src_damount * rate;
-    uint64_t dst_amount = damount_to_amount(dst_damount, dest_precision);
+    double dest_damount = src_damount * rate;
+    uint64_t dest_amount = damount_to_amount(dest_damount, dest_precision);
 
-    return dst_amount;
+    return dest_amount;
 }

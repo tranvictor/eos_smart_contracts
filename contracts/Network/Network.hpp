@@ -47,7 +47,7 @@ class Network : public contract {
             EOSLIB_SERIALIZE( reserve, (contract) )
         };
 
-        /* TODO: change to 2 lists of per_token_src and per_token_dst */
+        /* TODO: change to 2 lists of per_token_src and per_token_dest */
         struct [[eosio::table]] reservespert {
             uint64_t                    symbol;
             uint64_t                    token_contract;

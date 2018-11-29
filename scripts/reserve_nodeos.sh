@@ -20,11 +20,10 @@ cleos create account eosio eosio.token EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHu
 cleos set contract eosio.token contracts/Token eosio.token.wasm --abi eosio.token.abi -p eosio.token@active
 cleos push action eosio.token create '[ "eosio", "1000000000.0000 SYS"]' -p eosio.token@active
 cleos push action eosio.token issue '[ "alice", "100.0000 SYS", "memo" ]' -p eosio@active
-cleos push action eosio.token issue '[ "reserve", "100.0000 SYS", "memo" ]' -p eosio@active
+
 
 cleos push action eosio.token create '[ "eosio", "1000000000.0000 EOS"]' -p eosio.token@active
 cleos push action eosio.token issue '[ "alice", "100.0000 EOS", "memo" ]' -p eosio@active
-cleos push action eosio.token issue '[ "reserve", "69.3000 EOS", "memo" ]' -p eosio@active
 cleos push action eosio.token issue '[ "network", "100.0000 EOS", "memo" ]' -p eosio@active
 
 #deploy reserve
@@ -32,6 +31,9 @@ cleos set account permission reserve active "{\"threshold\": 1, \"keys\":[{\"key
 #disable to skip compilation:
 #cd contracts/Reserve/AmmReserve ; eosio-cpp -o AmmReserve.wasm AmmReserve.cpp --abigen ; cd ../../..
 cleos set contract reserve contracts/Reserve/AmmReserve AmmReserve.wasm -p reserve@active
+
+cleos push action eosio.token issue '[ "reserve", "100.0000 SYS", "deposit" ]' -p eosio@active
+cleos push action eosio.token issue '[ "reserve", "69.3000 EOS", "deposit" ]' -p eosio@active
 
 #double r, double p_min, asset  max_eos_cap_buy, asset  max_eos_cap_sell, double fee_percent, double max_sell_rate, double min_sell_rate
 cleos push action reserve setparams '[ "0.01", "0.05", "20.0000 EOS", "20.0000 EOS", "0.25", "0.5555", "0.00000555" ]' -p reserve@active

@@ -134,9 +134,9 @@ void AmmReserve::getconvrate(asset src) {
     }
 }
 
-double AmmReserve::reserve_get_conv_rate(asset      src,
-                                         double     &rate,
-                                         uint64_t   &dst_amount) {
+void AmmReserve::reserve_get_conv_rate(asset      src,
+                                       double     &rate,
+                                       uint64_t   &dst_amount) {
 
     /* verify contract was init */
     auto state_ptr = state_instance.find(_self);
@@ -168,8 +168,6 @@ double AmmReserve::reserve_get_conv_rate(asset      src,
                                           state_ptr->token_contract,
                                           state_ptr->token_asset.symbol);
     if (this_dest_balance.amount < dst_amount) return 0;
-
-    return rate;
 }
 
 double AmmReserve::liquidity_get_rate(const struct state &current_state,
@@ -178,6 +176,7 @@ double AmmReserve::liquidity_get_rate(const struct state &current_state,
                                       asset src_asset) {
 
     /* require(qtyInSrcWei <= MAX_QTY); */
+    eosio_assert(src_asset.quantity > MAX_QTY, "src asset quantity too big");
 
     asset eos_balance = get_balance(_self, current_state.eos_contract, EOS_SYMBOL);
     double e = asset_to_damount(eos_balance);
@@ -299,7 +298,14 @@ double AmmReserve::delta_e_func(const struct params &current_params, double e, d
 
 void AmmReserve::reserve_trade(const struct transfer &transfer, const account_name code) {
 
-    if (transfer.to != _self) return; /* TODO: is this ok? */
+    /* only owner can withdraw funds (also checked in the token contract) */
+    if (transfer.from == _self) require_auth(_self);
+
+    /* if getting notified on an action that does not send funds here, do nothing. */
+    if (transfer.to != _self) return;
+
+    /* allow depositing funds without entering the trade sequence */
+    if (transfer.memo == "deposit") return;
 
     auto state_ptr = state_instance.find(_self);
     eosio_assert(state_ptr != state_instance.end(), "init was not called");
@@ -389,7 +395,7 @@ void AmmReserve::record_imbalance(const struct params &current_params,
 
     auto itr = state_instance.find(_self);
     state_instance.modify(itr, _self, [&](auto& s) {
-        s.collected_fees_in_tokens.amount = fees_amount;
+        s.collected_fees_in_tokens.amount += fees_amount;
     });
 }
 

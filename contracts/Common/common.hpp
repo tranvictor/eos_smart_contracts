@@ -15,7 +15,9 @@ using namespace eosio;
 #define EOS_PRECISION 4
 #define EOS_SYMBOL S(EOS_PRECISION, EOS)
 #define MAX_RATE 100000 /* up to 1M tokens per EOS */
-//#define MAX_QTY pow(10,28); /* 10B tokens */
+
+/* TODO: should we support MAX_QTY? precision 18 leaves place for only 18.4 tokens in uint64*/
+/* #define MAX_QTY pow(10,28) */
 
 struct transfer {
     account_name from;

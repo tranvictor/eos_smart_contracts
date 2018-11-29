@@ -102,9 +102,9 @@ class AmmReserve : public contract {
         rate_type   rate_instance;
         state_type  state_instance;
 
-        double reserve_get_conv_rate(asset      src,
-                                     double     &rate,
-                                     uint64_t   &dst_amount);
+        void reserve_get_conv_rate(asset      src,
+                                   double     &rate,
+                                   uint64_t   &dst_amount);
 
         double liquidity_get_rate(const struct state &current_state,
                                   const struct params &current_params,

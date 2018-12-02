@@ -17,7 +17,7 @@ async function main(){
 
     // example for getUserBalance
     const balanceBefore = await services.getUserBalance(eos, mosheAccount, 'SYS')
-    console.log("moshe balance before", balanceBefore)
+    console.log("moshe SYS balance before", balanceBefore)
     
     // example for getMatchingAmount
     const expectedDestAmount = await services.getMatchingAmount(eos, 'EOS', 'SYS', 0.0100)
@@ -28,24 +28,24 @@ async function main(){
     console.log("expected rate", rate)
 
     // example for trade with network
-    await services.trade(
-        eos,
-        aliceAccount, 
-        "0.0100",
-        4,
-        "alice",
-        "EOS",
-        4,
-        "SYS",
-        "moshe",
-        20,
-        "0.000001",
-        "some_wallet_id",
-        "some_hint"
-    )
+    await services.trade({
+        eos: eos,
+        userAccount: aliceAccount, 
+        srcAmount: "0.0100",
+        srcPrecision: 4,
+        srcAccount: "alice",
+        srcSymbol: "EOS",
+        destPrecision: 4,
+        destSymbol: "SYS",
+        destAccount: "moshe",
+        maxDestAmount: 200000,
+        minConversionRate: "0.000001",
+        walletId: "some_wallet_id",
+        hint: "some_hint"
+    })
 
     const balanceAfter = await services.getUserBalance(eos, mosheAccount, 'SYS')
-    console.log("moshe balance after", balanceAfter) 
+    console.log("moshe SYS balance after", balanceAfter) 
 }
 
 main()

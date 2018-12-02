@@ -334,9 +334,9 @@ void AmmReserve::do_trade(const struct params &current_params,
     eosio_assert(conversion_rate > 0, "conversion rate must be bigger than 0");
 
     uint64_t dest_amount = calc_dest_amount(conversion_rate,
-                                           src.symbol.precision(),
-                                           src.amount,
-                                           dest_symbol.precision());
+                                            src.symbol.precision(),
+                                            src.amount,
+                                            dest_symbol.precision());
     eosio_assert(dest_amount > 0, "internal error. calculated dest amount must be > 0");
 
     asset dest;

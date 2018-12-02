@@ -117,7 +117,7 @@ uint64_t calc_src_amount(double rate,
                          uint64_t dest_amount,
                          uint64_t dest_precision) {
 
-    double dest_damount = amount_to_damount(dest_amount, src_precision);
+    double dest_damount = amount_to_damount(dest_amount, dest_precision);
     double src_damount = dest_damount / rate;
     uint64_t src_amount = damount_to_amount(src_damount, src_precision);
 

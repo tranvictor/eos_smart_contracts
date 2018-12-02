@@ -33,7 +33,7 @@ module.exports.getMatchingAmount = async function(eos, srcSymbol, destSymbol, am
 module.exports.getUserBalance = async function(eos, account, symbol){
     let balanceRes = await eos.getCurrencyBalance({
         code: tokenAccount,
-        account: reserveAccount,
+        account: account,
         symbol: symbol}
     )
     return parseFloat(balanceRes[0]);
@@ -63,32 +63,21 @@ module.exports.getRate = async function(eos, srcSymbol, destSymbol, srcAmount) {
     }
 }
 
-module.exports.trade = async function(
-        eos,
-        userAccount,
-        srcAmount,
-        srcPrecision,
-        srcAccount,
-        srcSymbol,
-        destPrecision,
-        destSymbol,
-        destAccount,
-        maxDestAmount,
-        mixConversionRate,
-        walletId,
-        hint) {
-
-    let memo = `${srcAccount},${tokenAccount},${srcPrecision} ${srcSymbol},` +
-               `${tokenAccount},${destPrecision} ${destSymbol},${destAccount},` +
-               `${maxDestAmount},${mixConversionRate},${walletId},${hint}`
-    let asset = `${srcAmount} ${srcSymbol}`
+module.exports.trade = async function(options) {
+    let memo = `${options.srcAccount},${tokenAccount},${options.srcPrecision} ${options.srcSymbol},` +
+               `${tokenAccount},${options.destPrecision} ${options.destSymbol},${options.destAccount},` +
+               `${options.maxDestAmount},${options.minConversionRate},${options.walletId},${options.hint}`
+    let asset = `${options.srcAmount} ${options.srcSymbol}`
     
-    await eos.transfer(
-            userAccount,
+    console.log(memo)
+    console.log(asset)
+
+    await options.eos.transfer(
+            options.userAccount,
             networkAccount,
             asset, //'0.0100 EOS',
             memo,
-            {authorization: userAccount }
+            {authorization: options.userAccount}
     )
 }
 

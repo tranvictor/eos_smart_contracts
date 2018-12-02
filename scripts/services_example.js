@@ -16,15 +16,21 @@ const eos = Eos( {keyProvider: [ privateKeyDefault, privateKey ] /* , verbose: '
 async function main(){
 
     // example for getUserBalance
-    const balanceBefore = await services.getUserBalance(eos, mosheAccount, 'SYS')
+    const balanceBefore = await services.getUserBalance({eos:eos, account:mosheAccount, symbol:'SYS'})
     console.log("moshe SYS balance before", balanceBefore)
     
     // example for getMatchingAmount
-    const expectedDestAmount = await services.getMatchingAmount(eos, 'EOS', 'SYS', 0.0100)
+    const expectedDestAmount = await services.getMatchingAmount({
+        eos:eos,
+        srcSymbol:'EOS',
+        destSymbol:'SYS',
+        amount:0.0100}
+    )
     console.log("expected destAmount", expectedDestAmount)
 
     // example for getRate
-    const rate = await services.getRate(eos, 'EOS', 'SYS', 0.0100)
+    const rate = await services.getRate({eos:eos, srcSymbol:'EOS', destSymbol:'SYS', srcAmount:0.0100})
+
     console.log("expected rate", rate)
 
     // example for trade with network
@@ -44,7 +50,7 @@ async function main(){
         hint: "some_hint"
     })
 
-    const balanceAfter = await services.getUserBalance(eos, mosheAccount, 'SYS')
+    const balanceAfter = await services.getUserBalance({eos:eos, account:mosheAccount, symbol:'SYS'})
     console.log("moshe SYS balance after", balanceAfter) 
 }
 

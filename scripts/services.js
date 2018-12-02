@@ -11,7 +11,12 @@ module.exports.networkAccount = tokenAccount
 
 /////////// exported function function /////////// 
 
-module.exports.getMatchingAmount = async function(eos, srcSymbol, destSymbol, amount) {
+module.exports.getMatchingAmount = async function(options) {
+    let eos = options.eos
+    let srcSymbol = options.srcSymbol
+    let destSymbol = options.destSymbol
+    let amount = options.amount
+
     if (amount == 0) {
         return -1;
     }
@@ -30,7 +35,11 @@ module.exports.getMatchingAmount = async function(eos, srcSymbol, destSymbol, am
     }
 }
 
-module.exports.getUserBalance = async function(eos, account, symbol){
+module.exports.getUserBalance = async function(options){
+    let eos = options.eos
+    let account = options.account
+    let symbol = options.symbol
+
     let balanceRes = await eos.getCurrencyBalance({
         code: tokenAccount,
         account: account,
@@ -39,7 +48,11 @@ module.exports.getUserBalance = async function(eos, account, symbol){
     return parseFloat(balanceRes[0]);
 }
 
-module.exports.getRate = async function(eos, srcSymbol, destSymbol, srcAmount) {
+module.exports.getRate = async function(options) {
+    eos = options.eos
+    srcSymbol = options.srcSymbol
+    destSymbol = options.destSymbol
+    srcAmount = options.srcAmount
 
     let params = await getParams(eos);
     let r = parseFloat(params["rows"][0]["r"]);
@@ -52,32 +65,44 @@ module.exports.getRate = async function(eos, srcSymbol, destSymbol, srcAmount) {
         } else {
             return -1.0 / priceForDeltaE(r, pmin, srcAmount, reserveEos)
         }
-    } else if (srcSymbol == "SYS") {
+    } else {
         if (srcAmount == 0) {
             return pOfE(r, pmin, reserveEos) // TODO: divide 1/?
         } else {
             return priceForDeltaT(r, pmin, srcAmount, reserveEos)
         }
-    } else {
-        return -1;
     }
 }
 
 module.exports.trade = async function(options) {
-    let memo = `${options.srcAccount},${tokenAccount},${options.srcPrecision} ${options.srcSymbol},` +
-               `${tokenAccount},${options.destPrecision} ${options.destSymbol},${options.destAccount},` +
-               `${options.maxDestAmount},${options.minConversionRate},${options.walletId},${options.hint}`
-    let asset = `${options.srcAmount} ${options.srcSymbol}`
+    let eos = options.eos
+    let userAccount = options.userAccount 
+    let srcAmount = options.srcAmount
+    let srcPrecision = options.srcPrecision
+    let srcAccount = options.srcAccount
+    let srcSymbol = options.srcSymbol
+    let destPrecision = options.destPrecision
+    let destSymbol = options.destSymbol
+    let destAccount = options.destAccount
+    let maxDestAmount = options.maxDestAmount
+    let minConversionRate = options.minConversionRate
+    let walletId = options.walletId
+    let hint = options.hint
+
+    let memo = `${srcAccount},${tokenAccount},${srcPrecision} ${srcSymbol},` +
+               `${tokenAccount},${destPrecision} ${destSymbol},${destAccount},` +
+               `${maxDestAmount},${minConversionRate},${walletId},${hint}`
+    let asset = `${srcAmount} ${srcSymbol}`
     
     console.log(memo)
     console.log(asset)
 
-    await options.eos.transfer(
-            options.userAccount,
+    await eos.transfer(
+            userAccount,
             networkAccount,
             asset, //'0.0100 EOS',
             memo,
-            {authorization: options.userAccount}
+            {authorization: userAccount}
     )
 }
 

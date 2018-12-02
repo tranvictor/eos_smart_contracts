@@ -76,7 +76,7 @@ class Network : public contract {
                          bool add);
 
         [[eosio::action]]
-         void trade1(account_name reserve, memo_trade_structure memo_struct);
+         void trade1(memo_trade_structure memo_struct);
 
         [[eosio::action]]
          void trade2(account_name reserve,

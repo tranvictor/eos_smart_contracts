@@ -114,27 +114,45 @@ void Network::trade0(const struct transfer &transfer, const account_name code) {
     /* fill memo struct with amount to avoid passing the transfer object afterwards. */
     memo_struct.src.amount = transfer.quantity.amount;
 
-    /* TODO - add reserve choosing logic. currently we use the first reserve listed for the token. */
-    auto reserve = (memo_struct.src.symbol.value != EOS_SYMBOL) ?
-            reservespert_table_inst.get(memo_struct.src.symbol.value).reserve_contracts[0] :
-            reservespert_table_inst.get(memo_struct.dest.symbol.value).reserve_contracts[0];
+    /* get rates from all reserves that hold the pair */
+    auto reservespert_entry = (memo_struct.src.symbol.value != EOS_SYMBOL) ?
+            reservespert_table_inst.get(memo_struct.src.symbol.value) :
+            reservespert_table_inst.get(memo_struct.dest.symbol.value);
 
-    action {
-        permission_level{_self, N(active)},
-        reserve,
-        N(getconvrate),
-        std::make_tuple(memo_struct.src)
-    }.send();
+    for (int i = 0; i < reservespert_entry.num_reserves; i++) {
+        auto reserve = reservespert_entry.reserve_contracts[i];
+        action {
+            permission_level{_self, N(active)},
+            reserve,
+            N(getconvrate),
+            std::make_tuple(memo_struct.src)
+        }.send();
+    }
 
-    SEND_INLINE_ACTION(*this, trade1, {_self, N(active)}, {reserve, memo_struct});
+    SEND_INLINE_ACTION(*this, trade1, {_self, N(active)}, {memo_struct});
 }
 
-void Network::trade1(account_name reserve,
-                     memo_trade_structure memo_struct
-) {
-    auto rate_entry = rate_type(reserve, reserve).get(reserve);
-    auto stored_rate = rate_entry.stored_rate;
-    auto rate_result_dest_amount = rate_entry.dest_amount;
+void Network::trade1(memo_trade_structure memo_struct) {
+
+    /* read stored rates from all reserves that hold the pair */
+    auto reservespert_entry = (memo_struct.src.symbol.value != EOS_SYMBOL) ?
+            reservespert_table_inst.get(memo_struct.src.symbol.value) :
+            reservespert_table_inst.get(memo_struct.dest.symbol.value);
+
+    double best_rate = 0;
+    int best_reserve_index = 0;
+    for (int i = 0; i < reservespert_entry.num_reserves; i++) {
+        auto reserve = reservespert_entry.reserve_contracts[i];
+        auto rate_entry = rate_type(reserve, reserve).get(reserve);
+
+        if(rate_entry.stored_rate > best_rate) {
+            best_reserve_index = i;
+        }
+    }
+    auto best_reserve = reservespert_entry.reserve_contracts[best_reserve_index];
+    auto best_rate_entry = rate_type(best_reserve, best_reserve).get(best_reserve);
+    auto stored_rate = best_rate_entry.stored_rate;
+    auto rate_result_dest_amount = best_rate_entry.dest_amount;
 
     eosio_assert(stored_rate >= memo_struct.min_conversion_rate,
                  "recieved rate is smaller than min conversion rate.");
@@ -157,7 +175,7 @@ void Network::trade1(account_name reserve,
     SEND_INLINE_ACTION(*this,
                        trade2,
                        {_self, N(active)},
-                       {reserve, memo_struct, actual_src, actual_dest});
+                       {best_reserve, memo_struct, actual_src, actual_dest});
 }
 
 void Network::trade2(account_name reserve,

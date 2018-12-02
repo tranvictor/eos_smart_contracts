@@ -1,5 +1,5 @@
 {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Sun Dec  2 21:20:35 2018",
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Sun Dec  2 21:54:43 2018",
     "version": "eosio::abi/1.0",
     "structs": [
         {
@@ -152,10 +152,6 @@
             "name": "trade1",
             "base": "",
             "fields": [
-                {
-                    "name": "reserve",
-                    "type": "name"
-                },
                 {
                     "name": "memo_struct",
                     "type": "memo_trade_structure"

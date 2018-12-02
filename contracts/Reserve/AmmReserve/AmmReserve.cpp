@@ -297,11 +297,12 @@ void AmmReserve::reserve_trade(const struct transfer &transfer, const account_na
     eosio_assert(current_state.trade_enabled, "trade is not enabled");
 
     eosio_assert(transfer.memo.length() > 0 , "needs a memo");
-    auto parsed_memo = parse_memo(transfer.memo);
 
     eosio_assert(transfer.quantity.symbol == EOS_SYMBOL ||
                  transfer.quantity.symbol == current_state.token.symbol,
                  "unrecognized transfer asset symbol");
+
+    account_name dest_address = string_to_name(transfer.memo.c_str());
 
     symbol_type dest_symbol;
     account_name dest_contract;
@@ -313,10 +314,13 @@ void AmmReserve::reserve_trade(const struct transfer &transfer, const account_na
         dest_contract = current_state.eos_contract;
     }
 
+    /* get conversion rate, assuming it is stored here since getconvrate was called beforehand */
+    double conversion_rate = (rate_instance.get(_self)).stored_rate;
+
     do_trade(current_params,
              transfer.quantity,
-             parsed_memo.dest_address,
-             parsed_memo.conversion_rate,
+             dest_address,
+             conversion_rate,
              dest_symbol,
              dest_contract);
 }
@@ -367,16 +371,6 @@ void AmmReserve::record_fees(const struct params &current_params,
     state_instance.modify(itr, _self, [&](auto &s) {
         s.collected_fees_in_tokens.amount += fees_amount;
     });
-}
-
-reserve_memo_trade_structure AmmReserve::parse_memo(std::string memo) {
-    auto res = reserve_memo_trade_structure();
-    auto parts = split(memo, ",");
-
-    res.dest_address = string_to_name(parts[0].c_str());
-    res.conversion_rate = stof(parts[1].c_str()); /* TODO - is stof ok for parsing to double? */
-
-    return res;
 }
 
 void AmmReserve::apply(const account_name contract, const account_name act) {

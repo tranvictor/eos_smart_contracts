@@ -123,7 +123,7 @@ void Network::trade0(const struct transfer &transfer, const account_name code) {
         permission_level{_self, N(active)},
         reserve,
         N(getconvrate),
-        std::make_tuple(memo_struct.src_asset, memo_struct.dest_asset)
+        std::make_tuple(memo_struct.src_asset)
     }.send();
 
     SEND_INLINE_ACTION(*this, trade1, {_self, N(active)}, {reserve, memo_struct});
@@ -133,17 +133,17 @@ void Network::trade1(account_name reserve,
                      memo_trade_structure memo_struct
 ) {
     auto rate_entry = rate_type(reserve, reserve).get(reserve);
-    auto sored_rate = rate_entry.stored_rate;
+    auto stored_rate = rate_entry.stored_rate;
     auto rate_result_dest_amount = rate_entry.dest_amount;
 
-    eosio_assert(sored_rate >= memo_struct.min_conversion_rate,
+    eosio_assert(stored_rate >= memo_struct.min_conversion_rate,
                  "recieved rate is smaller than min conversion rate.");
 
     asset actual_src_asset;
     asset actual_dest_asset;
 
     calc_actual_assets(memo_struct,
-                       sored_rate,
+                       stored_rate,
                        rate_result_dest_amount,
                        actual_src_asset,
                        actual_dest_asset);
@@ -170,6 +170,9 @@ void Network::trade2(account_name reserve,
                                                 memo_struct.dest_contract,
                                                 memo_struct.dest_asset.symbol);
 
+    /* since no suitable method to turn double into string we do not pass
+     * conversion rate to reserve. Instead we assume that it's already stored there. */
+
     /* do reserve trade */
     action {
         permission_level{_self, N(active)},
@@ -178,7 +181,7 @@ void Network::trade2(account_name reserve,
         std::make_tuple(_self,
                         reserve,
                         actual_src_asset,
-                        (name{memo_struct.dest_account}).to_string()) //memo
+                        (name{memo_struct.dest_account}).to_string())
     }.send();
 
     SEND_INLINE_ACTION(
@@ -203,17 +206,8 @@ void Network::trade3(account_name reserve,
     eosio_assert(dest_asset_difference == actual_dest_asset, "trade amount not added to dest");
 }
 
-float Network::calc_src_amount(float rate,
-                               uint64_t src_precision,
-                               uint64_t dest_amount,
-                               uint64_t dest_precision) {
-
-    return float(dest_amount * pow(10,src_precision)) /
-           (rate * pow(10,dest_precision));
-}
-
 void Network::calc_actual_assets(memo_trade_structure &memo_struct,
-                                 float rate_result,
+                                 double rate_result,
                                  uint64_t rate_result_dest_amount,
                                  asset &actual_src_asset,
                                  asset &actual_dest_asset) {
@@ -265,7 +259,7 @@ memo_trade_structure Network::parse_memo(std::string memo) {
     res.dest_asset = asset(0, string_to_symbol(stoi(sym_parts[0].c_str()),sym_parts[1].c_str()));
 
     res.dest_account = string_to_name(parts[5].c_str());
-    res.max_dest_amount = stoi(parts[6].c_str()); //TODO: should we use std:stoul to turn to unsignd ints?
+    res.max_dest_amount = stoi(parts[6].c_str()); /* TODO: should we use std:stoul to turn to unsignd ints? */
     res.min_conversion_rate = stof(parts[7].c_str());
     res.walletId = string_to_name(parts[8].c_str());
     res.hint = parts[7];

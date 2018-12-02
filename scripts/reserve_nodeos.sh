@@ -52,4 +52,4 @@ cleos push action reserve getconvrate '[ "1.000 SYS"]' -p network@active
 cleos get table reserve reserve rate
 
 #do a trade (send back to alice)
-cleos push action eosio.token transfer '[ "network", "reserve", "0.0100 EOS", "alice,9.97596942734602443" ]' -p network@active
+cleos push action eosio.token transfer '[ "network", "reserve", "0.0100 EOS", "alice" ]' -p network@active

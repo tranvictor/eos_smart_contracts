@@ -100,16 +100,13 @@ class Network : public contract {
 
         void trade0(const struct transfer &transfer, const account_name code);
         void calc_actual_assets(memo_trade_structure &memo_struct,
-                                float rate_result,
+                                double rate_result,
                                 uint64_t rate_result_dest_amount,
                                 asset &actual_src_asset,
                                 asset &actual_dest_asset);
         int find_reserve(std::vector<account_name> reserve_list,
                          uint8_t num_reserves,
                          account_name reserve);
-        float calc_src_amount(float rate,
-                              uint64_t src_precision,
-                              uint64_t dest_amount,
-                              uint64_t dest_precision);
+
         memo_trade_structure parse_memo(std::string memo);
 };

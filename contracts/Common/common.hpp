@@ -33,7 +33,7 @@ struct account {
 
 struct rate {
     account_name    manager;
-    float           stored_rate;
+    double          stored_rate;
     uint64_t        dest_amount;
     uint64_t        primary_key() const { return manager; }
     EOSLIB_SERIALIZE( rate, (manager)(stored_rate)(dest_amount) )
@@ -110,6 +110,18 @@ uint64_t damount_to_amount(double damount, uint64_t precision) {
 
 double asset_to_damount(asset quantity) {
     return (quantity.amount / double(pow(10, quantity.symbol.precision())));
+}
+
+uint64_t calc_src_amount(double rate,
+                         uint64_t src_precision,
+                         uint64_t dest_amount,
+                         uint64_t dest_precision) {
+
+    double dest_damount = amount_to_damount(dest_amount, src_precision);
+    double src_damount = dest_damount / rate;
+    uint64_t src_amount = damount_to_amount(src_damount, src_precision);
+
+    return src_amount;
 }
 
 uint64_t calc_dest_amount(double rate,

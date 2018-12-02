@@ -5,11 +5,6 @@
 #include <eosiolib/asset.hpp>
 #include "../../Common/common.hpp"
 
-struct reserve_memo_trade_structure {
-    account_name dest_address;
-    double       conversion_rate;
-};
-
 class AmmReserve : public contract {
 
     public:
@@ -152,7 +147,5 @@ class AmmReserve : public contract {
         void record_fees(const struct params &current_params,
                          asset token,
                          bool buy);
-
-        reserve_memo_trade_structure parse_memo(std::string memo);
 };
 

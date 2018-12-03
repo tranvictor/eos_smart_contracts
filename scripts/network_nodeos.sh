@@ -11,7 +11,6 @@ set -x
 
 PUBLIC_KEY=EOS5CYr5DvRPZvfpsUGrQ2SnHeywQn66iSbKKXn4JDTbFFr36TRTX
 cleos create account eosio moshe $PUBLIC_KEY
-cleos create account eosio network $PUBLIC_KEY
 cleos create account eosio reserve1 $PUBLIC_KEY
 cleos create account eosio reserve2 $PUBLIC_KEY
 cleos create account eosio reserve3 $PUBLIC_KEY
@@ -24,7 +23,7 @@ cleos set account permission network active "{\"threshold\": 1, \"keys\":[{\"key
 cd contracts/Network/
 
 #disable to skip compilation:
-eosio-cpp -o Network.wasm Network.cpp --abigen
+#eosio-cpp -o Network.wasm Network.cpp --abigen
 
 #fix abi file since in current version of abigen vectors are not processed correctly
 sed -i -e 's/vector<account_name>/uint64[]/g' Network.abi
@@ -42,6 +41,10 @@ cleos push action network addreserve '[ "reserve", true ]' -p network@active
 cleos push action network listpairres '[ "reserve", "0.0000 SYS", "eosio.token", true, true, true ]' -p network@active
 cleos push action network listpairres '[ "reserve1", "0.0000 SYS", "eosio.token", true, true, true ]' -p network@active
 cleos push action network listpairres '[ "reserve2", "0.0000 SYS", "eosio.token", true, true, true ]' -p network@active
+
+cleos push action network listpairres '[ "reserve1", "0.0000 SYS", "eosio.token", false, false, false ]' -p network@active
+cleos push action network listpairres '[ "reserve2", "0.0000 SYS", "eosio.token", false, false, false ]' -p network@active
+
 
 cleos get table network network reservespert
 

@@ -1,5 +1,5 @@
 {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Sat Nov 24 21:21:57 2018",
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Sun Dec  2 21:54:43 2018",
     "version": "eosio::abi/1.0",
     "structs": [
         {
@@ -25,7 +25,7 @@
                     "type": "name"
                 },
                 {
-                    "name": "token_asset",
+                    "name": "token",
                     "type": "asset"
                 },
                 {
@@ -59,7 +59,7 @@
                     "type": "name"
                 },
                 {
-                    "name": "src_asset",
+                    "name": "src",
                     "type": "asset"
                 },
                 {
@@ -67,7 +67,7 @@
                     "type": "name"
                 },
                 {
-                    "name": "dest_asset",
+                    "name": "dest",
                     "type": "asset"
                 },
                 {
@@ -80,7 +80,7 @@
                 },
                 {
                     "name": "min_conversion_rate",
-                    "type": "float32"
+                    "type": "float64"
                 },
                 {
                     "name": "walletId",
@@ -153,10 +153,6 @@
             "base": "",
             "fields": [
                 {
-                    "name": "reserve",
-                    "type": "name"
-                },
-                {
                     "name": "memo_struct",
                     "type": "memo_trade_structure"
                 }
@@ -175,11 +171,11 @@
                     "type": "memo_trade_structure"
                 },
                 {
-                    "name": "actual_src_asset",
+                    "name": "actual_src",
                     "type": "asset"
                 },
                 {
-                    "name": "actual_dest_asset",
+                    "name": "actual_dest",
                     "type": "asset"
                 }
             ]
@@ -197,15 +193,15 @@
                     "type": "memo_trade_structure"
                 },
                 {
-                    "name": "actual_src_asset",
+                    "name": "actual_src",
                     "type": "asset"
                 },
                 {
-                    "name": "actual_dest_asset",
+                    "name": "actual_dest",
                     "type": "asset"
                 },
                 {
-                    "name": "dest_asset_before_trade",
+                    "name": "dest_before_trade",
                     "type": "asset"
                 }
             ]

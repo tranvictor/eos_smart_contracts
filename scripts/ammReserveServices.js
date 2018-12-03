@@ -9,57 +9,100 @@ module.exports.getRate = async function(options) {
     srcAmount = options.srcAmount
 
     let params = await getParams(eos, reserveAccount);
-    let r = parseFloat(params["rows"][0]["r"]);
-    let pmin = parseFloat(params["rows"][0]["p_min"]);
-    let reserveEos = await getReserveEos(eos, reserveAccount, eosTokenAccount);
-
-    if (srcSymbol == "EOS") {
-        if (srcAmount == 0) {
-            return 1 / pOfE(r, pmin, reserveEos)
-        } else {
-            return priceForDeltaE(r, pmin, srcAmount, reserveEos)
-        }
-    } else {
-        if (srcAmount == 0) {
-            return pOfE(r, pmin, reserveEos)
-        } else {
-            return priceForDeltaT(r, pmin, srcAmount, reserveEos)
-        }
+    let currentParams = {
+        r:              parseFloat(params["rows"][0]["r"]),
+        pMin:           parseFloat(params["rows"][0]["p_min"]),
+        maxEosCapBuy:   parseFloat(params["rows"][0]["max_eos_cap_buy"].split(" ")[0]),
+        maxEosCapSell:  parseFloat(params["rows"][0]["max_eos_cap_buy"].split(" ")[0]),
+        feePercent:     parseFloat(params["rows"][0]["fee_percent"]),
+        maxBuyRate:     parseFloat(params["rows"][0]["max_buy_rate"]),
+        minBuyRate:     parseFloat(params["rows"][0]["min_buy_rate"]),
+        maxSellRate:    parseFloat(params["rows"][0]["max_sell_rate"]),
+        minSellRate:    parseFloat(params["rows"][0]["min_sell_rate"])
     }
+
+    let e = await getReserveEos(eos, reserveAccount, eosTokenAccount);
+
+    let rate
+    let deltaE
+    let deltaT;
+
+    isBuy = (srcSymbol == "EOS")
+    if (isBuy) {
+        deltaE = srcAmount;
+        if (srcAmount > currentParams.maxEosCapBuy) return 0;
+        rate = (deltaE == 0) ? buyRateZeroQuantity(currentParams, e) :
+                               buyRate(currentParams, e, deltaE)
+    } else {
+        deltaT = valueAfterReducingFee(currentParams, srcAmount);
+        if (deltaT == 0) {
+            rate = sellRateZeroQuantity(currentParams, e)
+            deltaE = 0
+        } else {
+            rateAnddeltaE = sellRate(currentParams, e, srcAmount, deltaT);
+            rate = rateAnddeltaE[0]
+            deltaE = rateAnddeltaE[1]
+        }
+        if (deltaE > currentParams.maxEosCapSell) return 0;
+    }
+    return rateAfterValidation(currentParams, rate, isBuy);
 }
 
 /////////// internal function /////////// 
 
-function pOfE(r, pMin, curE) { 
-    return pMin * Math.exp(r * curE); 
+function buyRate(currentParams, e, deltaE) {
+    let deltaT = deltaTFunc(currentParams, e, deltaE);
+    deltaT = valueAfterReducingFee(currentParams, deltaT);
+    return deltaT / deltaE;
 }
 
-function buyPriceForZeroQuant(r, pMin, curE) { 
-    let pOfERes = pOfE(r, pMin, curE);
-    let buyPrice = 1.0 / pOfE(r, pMin, curE);
-    return buyPrice;
+function buyRateZeroQuantity(currentParams, e) {
+    let ratePreReduction = 1 / pOfE(currentParams, e);
+    return valueAfterReducingFee(currentParams, ratePreReduction);
 }
 
-function sellPriceForZeroQuant(r, pMin, curE) { 
-    return pOfE(r, pMin, curE);
+function sellRate(currentParams, e, srcAmount, deltaT) {
+    let deltaE = deltaEFunc(currentParams, e, deltaT);
+    let rate = deltaE / srcAmount;
+    return [rate, deltaE]
 }
 
-function calcDeltaT(r, pMin, deltaE, curE) {
-    return (Math.exp((-r) * deltaE) - 1.0) / (r * pOfE(r, pMin, curE));
+function sellRateZeroQuantity(currentParams, e) {
+    let ratePreReduction = pOfE(currentParams, e);
+    return valueAfterReducingFee(currentParams, ratePreReduction);
 }
 
-function calcDeltaE(r, pMin, deltaT, curE) {
-    return (-1) * Math.log(1.0 + r * pOfE(r, pMin, curE) * deltaT) / r;
+function valueAfterReducingFee(currentParams, value) {
+    return ((100.0 - currentParams.feePercent) * value) / 100.0;
 }
 
-function priceForDeltaE(r, pMin, deltaE, curE) { 
-    let deltaT = calcDeltaT(r, pMin, deltaE, curE);
-    return (-1) * deltaT / deltaE;
+function deltaTFunc(currentParams, e, deltaE) {
+    return (-1.0) *
+           (Math.exp((-currentParams.r) * deltaE) - 1.0) /
+           (currentParams.r * pOfE(currentParams.r, currentParams.pMin, e));
+}
+function deltaEFunc(currentParams, e, deltaT) {
+    return Math.log(1.0 + currentParams.r * pOfE(currentParams.r, currentParams.pMin, e) * deltaT) / 
+           currentParams.r;
 }
 
-function priceForDeltaT(r, pMin, deltaT, curE) {
-    let deltaE = calcDeltaE(r, pMin, deltaT, curE);
-    return -deltaE / deltaT;
+function pOfE(r, pMin, e) { 
+    return pMin * Math.exp(r * e); 
+}
+
+function rateAfterValidation(currentParams, rate, isBuy) {
+    let minAllowedRate, maxAllowedRate;
+
+    if (isBuy) {
+        minAllowedRate = currentParams.minBuyRate;
+        maxAllowedRate = currentParams.maxBuyRate;
+    } else {
+        minAllowedRate = currentParams.minSellRate;
+        maxAllowedRate = currentParams.maxSellRate;
+    }
+
+    if ((rate > maxAllowedRate) || (rate < minAllowedRate)) return 0;
+    return rate;
 }
 
 async function getParams(eos, reserveAccount) {

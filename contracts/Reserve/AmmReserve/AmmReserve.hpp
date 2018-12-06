@@ -5,146 +5,129 @@
 #include <eosiolib/asset.hpp>
 #include "../../Common/common.hpp"
 
-class AmmReserve : public contract {
+CONTRACT AmmReserve : public contract {
 
     public:
         using contract::contract;
 
-        struct [[eosio::table]] state {
-            account_name    manager;
-            account_name    network_contract;
+        TABLE state_t {
+            name    manager;
+            name    network_contract;
             asset           token;
-            account_name    token_contract;
-            account_name    eos_contract;
+            name    token_contract;
+            name    eos_contract;
             bool            trade_enabled;
             asset           collected_fees_in_tokens;
-            uint64_t        primary_key() const { return manager; }
-            EOSLIB_SERIALIZE(state, (manager)(network_contract)(token)(token_contract)
-                                     (eos_contract)(trade_enabled)(collected_fees_in_tokens))
+            uint64_t        primary_key() const { return manager.value; }
+            EOSLIB_SERIALIZE(state_t, (manager)(network_contract)(token)(token_contract)
+                                      (eos_contract)(trade_enabled)(collected_fees_in_tokens))
         };
 
-        struct [[eosio::table]] params {
-            account_name    manager;
-            double          r;
-            double          p_min;
-            asset           max_eos_cap_buy;
-            asset           max_eos_cap_sell;
-            double          fee_percent;
-            double          max_buy_rate;
-            double          min_buy_rate;
-            double          max_sell_rate;
-            double          min_sell_rate;
-            uint64_t        primary_key() const { return manager; }
-            EOSLIB_SERIALIZE(params, (manager)(r)(p_min)(max_eos_cap_buy)(max_eos_cap_sell)(fee_percent)
-                                     (max_buy_rate)(min_buy_rate)(max_sell_rate)(min_sell_rate))
+        TABLE params_t {
+            name        manager;
+            double      r;
+            double      p_min;
+            asset       max_eos_cap_buy;
+            asset       max_eos_cap_sell;
+            double      fee_percent;
+            double      max_buy_rate;
+            double      min_buy_rate;
+            double      max_sell_rate;
+            double      min_sell_rate;
+            uint64_t    primary_key() const { return manager.value; }
+            EOSLIB_SERIALIZE(params_t, (manager)(r)(p_min)(max_eos_cap_buy)(max_eos_cap_sell)(fee_percent)
+                                       (max_buy_rate)(min_buy_rate)(max_sell_rate)(min_sell_rate))
         };
 
         /* TODO: the following is duplicated with common.hpp, see if can remove from here. */
-        struct [[eosio::table]] rate {
-            account_name    manager;
-            double          stored_rate; /* TODO - adding hash/id to make sure we read correct rate? */
-            uint64_t        dest_amount; /* TODO: make it an asset to comply with standard that amounts are assets, rates are double? */
-            uint64_t        primary_key() const { return manager; }
-            EOSLIB_SERIALIZE(rate, (manager)(stored_rate)(dest_amount))
+        TABLE rate_t {
+            name        manager;
+            double      stored_rate; /* TODO - adding hash/id to make sure we read correct rate? */
+            uint64_t    dest_amount; /* TODO: make it an asset to comply with standard that amounts are assets, rates are double? */
+            uint64_t    primary_key() const { return manager.value; }
+            EOSLIB_SERIALIZE(rate_t, (manager)(stored_rate)(dest_amount))
         };
 
-        typedef eosio::multi_index<N(state), state> state_type;
-        typedef eosio::multi_index<N(params), params> params_type;
-        typedef eosio::multi_index<N(rate), rate> rate_type;
+        typedef eosio::multi_index<"state"_n, state_t> state_type;
+        typedef eosio::multi_index<"params"_n, params_t> params_type;
+        typedef eosio::multi_index<"rate"_n, rate_t> rate_type;
 
-        AmmReserve(account_name self) : contract(self),
-                                        state_instance(self, self),
-                                        params_instance(self, self),
-                                        rate_instance(self, self) { }
+        ACTION init(name    network_contract,
+                    asset   token,
+                    name    token_contract,
+                    name    eos_contract,
+                    bool    enable_trade);
 
-        [[eosio::action]]
-        void init(account_name network_contract,
-                  asset        token,
-                  account_name token_contract,
-                  account_name eos_contract,
-                  bool         enable_trade);
+         ACTION setparams(double r,
+                          double p_min,
+                          asset  max_eos_cap_buy,
+                          asset  max_eos_cap_sell,
+                          double fee_percent,
+                          double max_sell_rate,
+                          double min_sell_rate);
 
-        [[eosio::action]]
-        void setparams(double r,
-                       double p_min,
-                       asset  max_eos_cap_buy,
-                       asset  max_eos_cap_sell,
-                       double fee_percent,
-                       double max_sell_rate,
-                       double min_sell_rate);
+        ACTION setnetwork(name network_contract);
 
-        [[eosio::action]]
-        void setnetwork(account_name network_contract);
+        ACTION enabletrade();
 
-        [[eosio::action]]
-        void enabletrade();
+        ACTION disabletrade();
 
-        [[eosio::action]]
-        void disabletrade();
+        ACTION resetfee();
 
-        [[eosio::action]]
-        void resetfee();
+        ACTION getconvrate(asset src);
 
-        [[eosio::action]]
-        void getconvrate(asset src);
-
-        void apply(const account_name contract, const account_name act);
-
-        /* TODO: do we need approvedWithdrawAddresses and approveWithdrawAddress()? */
+        void transfer(name from, name to, asset quantity, string memo);
 
     private:
-        params_type params_instance;
-        rate_type   rate_instance;
-        state_type  state_instance;
 
         double reserve_get_conv_rate(asset      src,
                                      uint64_t   &dest_amount);
 
-        double liquidity_get_rate(const struct state &current_state,
-                                  const struct params &current_params,
+        double liquidity_get_rate(const struct state_t &current_state,
+                                  const struct params_t &current_params,
                                   bool is_buy,
                                   asset src);
 
 
-        double get_rate_with_e(const struct params &current_params,
+        double get_rate_with_e(const struct params_t &current_params,
                                bool is_buy,
                                asset src,
                                double e);
 
-        double rate_after_validation(const struct params &current_params,
+        double rate_after_validation(const struct params_t &current_params,
                                      double rate,
                                      bool buy);
 
-        double buy_rate(const struct params &current_params, double e, double delta_e);
+        double buy_rate(const struct params_t &current_params, double e, double delta_e);
 
-        double buy_rate_zero_quantity(const struct params &current_params, double e);
+        double buy_rate_zero_quantity(const struct params_t &current_params, double e);
 
-        double sell_rate(const struct params &current_params,
+        double sell_rate(const struct params_t &current_params,
                          double e,
                          double sell_input_qty,
                          double delta_t,
                          double &delta_e);
 
-        double sell_rate_zero_quantity(const struct params &current_params, double e);
+        double sell_rate_zero_quantity(const struct params_t &current_params, double e);
 
-        double value_after_reducing_fee(const struct params &current_params,double val);
+        double value_after_reducing_fee(const struct params_t &current_params,double val);
 
-        double p_of_e(const struct params &current_params, double e);
+        double p_of_e(const struct params_t &current_params, double e);
 
-        double delta_t_func(const struct params &current_params, double e, double delta_e);
+        double delta_t_func(const struct params_t &current_params, double e, double delta_e);
 
-        double delta_e_func(const struct params &current_params, double e, double delta_t);
+        double delta_e_func(const struct params_t &current_params, double e, double delta_t);
 
-        void reserve_trade(const struct transfer &transfer, const account_name code);
+        void reserve_trade(name from, asset quantity, string memo, name code);
 
-        void do_trade(const struct params &current_params,
+        void do_trade(const struct params_t &current_params,
                       asset src,
-                      account_name dest_address,
+                      name dest_address,
                       double conversion_rate,
-                      symbol_type dest_symbol,
-                      account_name dest_contract);
+                      symbol dest_symbol,
+                      name dest_contract);
 
-        void record_fees(const struct params &current_params,
+        void record_fees(const struct params_t &current_params,
                          asset token,
                          bool buy);
 };

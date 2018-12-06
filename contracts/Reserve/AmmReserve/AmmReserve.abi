@@ -1,6 +1,6 @@
 {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Sun Dec  2 21:54:51 2018",
-    "version": "eosio::abi/1.0",
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Thu Dec  6 14:09:09 2018",
+    "version": "eosio::abi/1.1",
     "structs": [
         {
             "name": "disabletrade",
@@ -49,7 +49,7 @@
             ]
         },
         {
-            "name": "params",
+            "name": "params_t",
             "base": "",
             "fields": [
                 {
@@ -95,7 +95,7 @@
             ]
         },
         {
-            "name": "rate",
+            "name": "rate_t",
             "base": "",
             "fields": [
                 {
@@ -162,7 +162,7 @@
             ]
         },
         {
-            "name": "state",
+            "name": "state_t",
             "base": "",
             "fields": [
                 {
@@ -237,26 +237,27 @@
     "tables": [
         {
             "name": "params",
-            "type": "params",
+            "type": "params_t",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
         },
         {
             "name": "rate",
-            "type": "rate",
+            "type": "rate_t",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
         },
         {
             "name": "state",
-            "type": "state",
+            "type": "state_t",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
         }
     ],
     "ricardian_clauses": [],
+    "variants": [],
     "abi_extensions": []
 }

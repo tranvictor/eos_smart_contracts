@@ -3,6 +3,7 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/asset.hpp>
 #include <eosiolib/symbol.hpp>
+#include <eosiolib/singleton.hpp>
 
 #include <math.h>
 #include <string>
@@ -40,7 +41,9 @@ struct rate_t {
 };
 
 typedef eosio::multi_index<"accounts"_n, account> accounts;
-typedef eosio::multi_index<"rate"_n, rate_t> rate_type;
+
+typedef eosio::singleton<"rate"_n, rate_t> rate_type;
+typedef eosio::multi_index<"rate"_n, rate_t> dummy_rate_for_abi; /* hack until abi generator generates correct name */
 
 asset get_balance(name user, name token_contract, symbol symbol) {
     accounts fromAcc(token_contract, user.value);

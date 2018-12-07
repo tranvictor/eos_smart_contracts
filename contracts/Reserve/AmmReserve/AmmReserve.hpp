@@ -51,7 +51,8 @@ CONTRACT AmmReserve : public contract {
         typedef eosio::singleton<"params"_n, params_t> params_type;
         typedef eosio::multi_index<"params"_n, params_t> dummy_params_for_abi; /* hack until abi generator generates correct name */
 
-        typedef eosio::multi_index<"rate"_n, rate_t> rate_type;
+        typedef eosio::singleton<"rate"_n, rate_t> rate_type;
+        typedef eosio::multi_index<"rate"_n, rate_t> dummy_rate_for_abi; /* hack until abi generator generates correct name */
 
         ACTION init(name    network_contract,
                     asset   token,

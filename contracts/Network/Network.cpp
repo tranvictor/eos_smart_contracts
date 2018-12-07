@@ -156,14 +156,14 @@ ACTION Network::trade1(memo_trade_structure memo_struct) {
     int best_reserve_index = 0;
     for (int i = 0; i < reservespert_entry.num_reserves; i++) {
         auto reserve = reservespert_entry.reserve_contracts[i];
-        auto rate_entry = rate_type(reserve, reserve.value).get(reserve.value);
+        auto rate_entry = rate_type(reserve, reserve.value).get();
 
         if(rate_entry.stored_rate > best_rate) {
             best_reserve_index = i;
         }
     }
     auto best_reserve = reservespert_entry.reserve_contracts[best_reserve_index];
-    auto best_rate_entry = rate_type(best_reserve, best_reserve.value).get(best_reserve.value);
+    auto best_rate_entry = rate_type(best_reserve, best_reserve.value).get();
     auto stored_rate = best_rate_entry.stored_rate;
     auto rate_result_dest_amount = best_rate_entry.dest_amount;
 

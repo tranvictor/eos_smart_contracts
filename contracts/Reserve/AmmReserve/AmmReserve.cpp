@@ -102,19 +102,10 @@ ACTION AmmReserve::getconvrate(asset src) {
     if(rate == 0) dest_amount = 0;
 
     rate_type rate_instance(_self, _self.value);
-    auto itr = rate_instance.find(_self.value);
-    if(itr != rate_instance.end()) {
-        rate_instance.modify(itr, _self, [&](auto &s) {
-            s.stored_rate = rate;
-            s.dest_amount = dest_amount;
-        });
-    } else {
-        rate_instance.emplace( _self, [&](auto &s) {
-            s.manager = _self;
-            s.stored_rate = rate;
-            s.dest_amount = dest_amount;
-        });
-    }
+    rate_t s;
+    s.stored_rate = rate;
+    s.dest_amount = dest_amount;
+    rate_instance.set(s, _self);
 }
 
 double AmmReserve::reserve_get_conv_rate(asset      src,
@@ -292,7 +283,7 @@ void AmmReserve::reserve_trade(name from, asset quantity, string memo, name code
 
     /* get conversion rate, assuming it is stored here since getconvrate was called beforehand */
     rate_type rate_instance(_self, _self.value);
-    double conversion_rate = (rate_instance.get(_self.value)).stored_rate;
+    double conversion_rate = rate_instance.get().stored_rate;
 
     do_trade(current_params,
              quantity,

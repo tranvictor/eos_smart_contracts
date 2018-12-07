@@ -6,7 +6,6 @@
 #include "../Common/common.hpp"
 
 using namespace eosio;
-using namespace std; /* TODO: can remove it and replace string with std::string in some places. */
 
 #define MAX_RESERVES_PER_TOKEN  5
 #define NOT_FOUND              -1
@@ -21,7 +20,7 @@ struct memo_trade_structure {
     uint64_t    max_dest_amount;
     double      min_conversion_rate;
     name        walletId;
-    std::string hint; /* TODO: should hint be another type? */
+    string      hint; /* TODO: should hint be another type? */
 };
 
 CONTRACT Network : public contract {
@@ -42,11 +41,11 @@ CONTRACT Network : public contract {
 
         /* TODO: change to 2 lists of per_token_src and per_token_dest */
         TABLE reservespert_t {
-            uint64_t                symbol;
-            uint64_t                token_contract;
-            std::vector<name>       reserve_contracts;
+            symbol                  symbol;
+            name                    token_contract;
+            vector<name>       reserve_contracts;
             uint8_t                 num_reserves;
-            uint64_t                primary_key() const { return symbol; }
+            uint64_t                primary_key() const { return symbol.raw(); }
             EOSLIB_SERIALIZE(reservespert_t, (symbol)(token_contract)(reserve_contracts)(num_reserves))
         };
 
@@ -90,9 +89,9 @@ CONTRACT Network : public contract {
                           asset &actual_src,
                           asset &actual_dest);
 
-        int find_reserve(std::vector<name> reserve_list,
+        int find_reserve(vector<name> reserve_list,
                          uint8_t num_reserves,
                          name reserve);
 
-        memo_trade_structure parse_memo(std::string memo);
+        memo_trade_structure parse_memo(string memo);
 };

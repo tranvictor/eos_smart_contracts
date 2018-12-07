@@ -1,5 +1,5 @@
 {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Fri Dec  7 15:50:09 2018",
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Fri Dec  7 17:02:42 2018",
     "version": "eosio::abi/1.1",
     "structs": [
         {
@@ -108,11 +108,11 @@
             "fields": [
                 {
                     "name": "symbol",
-                    "type": "uint64"
+                    "type": "symbol"
                 },
                 {
                     "name": "token_contract",
-                    "type": "uint64"
+                    "type": "name"
                 },
                 {
                     "name": "reserve_contracts",

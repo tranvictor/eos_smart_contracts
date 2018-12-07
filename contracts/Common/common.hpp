@@ -11,6 +11,8 @@
 
 using std::string;
 using std::vector;
+using std::make_tuple;
+using std::stoi;
 using namespace eosio;
 
 #define EOS_PRECISION 4
@@ -24,7 +26,7 @@ struct transfer { /* TODO - can this be removed? */
     name         from;
     name         to;
     asset        quantity;
-    std::string  memo;
+    string  memo;
 };
 
 struct account {
@@ -60,7 +62,7 @@ void send(name from, name to, asset quantity, name dest_contract) {
         permission_level{from, "active"_n},
         dest_contract,
         "transfer"_n,
-        std::make_tuple(from, to, quantity, std::string("memo"))
+        std::make_tuple(from, to, quantity, string("memo"))
     }.send();
 }
 

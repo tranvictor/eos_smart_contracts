@@ -29,11 +29,11 @@ ACTION Network::addreserve(name reserve, bool add) {
 }
 
 ACTION Network::listpairres(name reserve,
-                          asset token,
-                          name token_contract,
-                          bool eos_to_token, /* unused */
-                          bool token_to_eos, /* unused */
-                          bool add
+                            asset token,
+                            name token_contract,
+                            bool eos_to_token, /* unused */
+                            bool token_to_eos, /* unused */
+                            bool add
 ) {
     require_auth( _self );
     /* TODO - add more assertions here. */
@@ -50,9 +50,9 @@ ACTION Network::listpairres(name reserve,
     if (add) {
         if (!token_exists) {
             reservespert_table_inst.emplace(_self, [&]( auto& s ) {
-               s.symbol = token.symbol.raw();
-               s.token_contract = token_contract.value;
-               s.reserve_contracts = std::vector<name>(MAX_RESERVES_PER_TOKEN, name());
+               s.symbol = token.symbol;
+               s.token_contract = token_contract;
+               s.reserve_contracts = vector<name>(MAX_RESERVES_PER_TOKEN, name());
                s.reserve_contracts[0] = reserve;
                s.num_reserves = 1;
             });
@@ -124,7 +124,7 @@ void Network::transfer(name from, name to, asset quantity, string memo) {
             permission_level{_self, "active"_n},
             reserve,
             "getconvrate"_n,
-            std::make_tuple(memo_struct.src)
+            make_tuple(memo_struct.src)
         }.send();
     }
 
@@ -202,10 +202,10 @@ ACTION Network::trade2(name reserve,
         permission_level{_self, "active"_n},
         memo_struct.src_contract,
         "transfer"_n,
-        std::make_tuple(_self,
-                        reserve,
-                        actual_src,
-                        (name{memo_struct.dest_account}).to_string())
+        make_tuple(_self,
+                   reserve,
+                   actual_src,
+                   (name{memo_struct.dest_account}).to_string())
     }.send();
 
     SEND_INLINE_ACTION(
@@ -261,7 +261,7 @@ void Network::calc_actuals(memo_trade_structure &memo_struct,
     actual_dest.symbol = memo_struct.dest.symbol;
 }
 
-int Network::find_reserve(std::vector<name> reserve_list,
+int Network::find_reserve(vector<name> reserve_list,
                           uint8_t num_reserves,
                           name reserve) {
     for(int index = 0; index < num_reserves; index++) {
@@ -272,7 +272,7 @@ int Network::find_reserve(std::vector<name> reserve_list,
     return NOT_FOUND;
 }
 
-memo_trade_structure Network::parse_memo(std::string memo) {
+memo_trade_structure Network::parse_memo(string memo) {
     auto res = memo_trade_structure();
     auto parts = split(memo, ",");
     res.trader = name(parts[0].c_str());

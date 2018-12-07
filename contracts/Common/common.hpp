@@ -41,7 +41,6 @@ struct rate_t {
 };
 
 typedef eosio::multi_index<"accounts"_n, account> accounts;
-
 typedef eosio::singleton<"rate"_n, rate_t> rate_type;
 typedef eosio::multi_index<"rate"_n, rate_t> dummy_rate_for_abi; /* hack until abi generator generates correct name */
 

@@ -33,7 +33,7 @@ CONTRACT Network : public contract {
             name        manager;
             bool        is_enabled;
             uint64_t    primary_key() const { return manager.value; }
-            EOSLIB_SERIALIZE(state_t, (manager)(is_enabled))
+            EOSLIB_SERIALIZE(state_t, (is_enabled))
         };
 
         TABLE reserve_t {
@@ -52,7 +52,8 @@ CONTRACT Network : public contract {
             EOSLIB_SERIALIZE(reservespert_t, (symbol)(token_contract)(reserve_contracts)(num_reserves))
         };
 
-        typedef eosio::multi_index<"state"_n, state_t> state_type;
+        typedef eosio::singleton<"state"_n, state_t> state_type;
+        typedef eosio::multi_index<"state"_n, state_t> dummy_state_for_abi; /* hack until abi generator generates correct name */
         typedef eosio::multi_index<"reserve"_n, reserve_t> reserves_type;
         typedef eosio::multi_index<"reservespert"_n, reservespert_t> reservespert_type;
 

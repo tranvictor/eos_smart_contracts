@@ -6,18 +6,10 @@ ACTION Network::setenable(bool enable) {
     /* TODO - add more assertions here. */
 
     state_type state_table_inst(_self, _self.value);
-    auto itr = state_table_inst.find(_self.value);
-    if(itr != state_table_inst.end()) {
-        state_table_inst.modify(itr, _self, [&]( auto& s ) {
-            s.is_enabled = enable;
-            s.manager = _self;
-        });
-    } else {
-        state_table_inst.emplace( _self, [&]( auto& s ) {
-            s.is_enabled = enable;
-            s.manager = _self;
-        });
-    }
+    state_t s;
+    s.is_enabled = enable;
+    s.manager = _self;
+    state_table_inst.set(s, _self);
 }
 
 ACTION Network::addreserve(name reserve, bool add) {
@@ -101,8 +93,7 @@ void Network::transfer(name from, name to, asset quantity, string memo) {
     if (to != _self) return; /* TODO: is this ok? */
 
     state_type state_table_inst(_self, _self.value);
-    eosio_assert(state_table_inst.find(_self.value) != state_table_inst.end(), "trade not enabled");
-    eosio_assert(state_table_inst.get(_self.value).is_enabled, "trade not enabled");
+    eosio_assert(state_table_inst.exists(), "trade not enabled");
     eosio_assert(memo.length() > 0, "needs a memo with transaction details");
     eosio_assert(quantity.is_valid(), "invalid transfer");
 

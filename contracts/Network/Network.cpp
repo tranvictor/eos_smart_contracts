@@ -8,7 +8,6 @@ ACTION Network::setenable(bool enable) {
     state_type state_table_inst(_self, _self.value);
     state_t s;
     s.is_enabled = enable;
-    s.manager = _self;
     state_table_inst.set(s, _self);
 }
 

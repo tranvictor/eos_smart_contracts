@@ -30,9 +30,7 @@ CONTRACT Network : public contract {
         using contract::contract;
 
         TABLE state_t {
-            name        manager;
             bool        is_enabled;
-            uint64_t    primary_key() const { return manager.value; }
             EOSLIB_SERIALIZE(state_t, (is_enabled))
         };
 

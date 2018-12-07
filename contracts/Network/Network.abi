@@ -1,5 +1,5 @@
 {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Fri Dec  7 15:48:08 2018",
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Fri Dec  7 15:50:09 2018",
     "version": "eosio::abi/1.1",
     "structs": [
         {
@@ -138,10 +138,6 @@
             "name": "state_t",
             "base": "",
             "fields": [
-                {
-                    "name": "manager",
-                    "type": "name"
-                },
                 {
                     "name": "is_enabled",
                     "type": "bool"

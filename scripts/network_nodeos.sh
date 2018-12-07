@@ -50,5 +50,5 @@ cleos get table network network reservespert
 
 
 cleos get table reserve reserve rate
-cleos push action eosio.token transfer '[ "alice", "network", "0.0100 SYS", "alice,eosio.token,4 SYS,eosio.token,4 EOS,moshe,20,0.000001,some_wallet_id,some_hint" ]' -p alice@active
+cleos push action eosio.token transfer '[ "alice", "network", "0.0100 SYS", "alice,eosio.token,4 SYS,eosio.token,4 EOS,moshe,20,0.000001,somewallid,somehint" ]' -p alice@active
 cleos get table reserve reserve rate

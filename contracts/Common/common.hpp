@@ -3,6 +3,7 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/asset.hpp>
 #include <eosiolib/symbol.hpp>
+#include <eosiolib/singleton.hpp>
 
 #include <math.h>
 #include <string>
@@ -10,55 +11,56 @@
 
 using std::string;
 using std::vector;
+using std::make_tuple;
+using std::stoi;
 using namespace eosio;
 
 #define EOS_PRECISION 4
-#define EOS_SYMBOL S(EOS_PRECISION, EOS)
+#define EOS_SYMBOL symbol("EOS", EOS_PRECISION)
 #define MAX_RATE 100000 /* up to 1M tokens per EOS */
 
 /* TODO: should we support MAX_QTY? precision 18 leaves place for only 18.4 tokens in uint64*/
 /* #define MAX_QTY pow(10,28) */
 
-struct transfer {
-    account_name from;
-    account_name to;
+struct transfer { /* TODO - can this be removed? */
+    name         from;
+    name         to;
     asset        quantity;
-    std::string  memo;
+    string  memo;
 };
 
 struct account {
     asset    balance;
-    uint64_t primary_key() const { return balance.symbol.name(); }
+    uint64_t primary_key() const { return balance.symbol.code().raw(); }
 };
 
-struct rate {
-    account_name    manager;
-    double          stored_rate;
-    uint64_t        dest_amount;
-    uint64_t        primary_key() const { return manager; }
-    EOSLIB_SERIALIZE( rate, (manager)(stored_rate)(dest_amount) )
+struct rate_t {
+    double      stored_rate;
+    uint64_t    dest_amount;
+    EOSLIB_SERIALIZE( rate_t, (stored_rate)(dest_amount) )
 };
 
-typedef eosio::multi_index<N(accounts), account> accounts;
-typedef eosio::multi_index<N(rate), rate> rate_type;
+typedef eosio::multi_index<"accounts"_n, account> accounts;
+typedef eosio::singleton<"rate"_n, rate_t> rate_type;
+typedef eosio::multi_index<"rate"_n, rate_t> dummy_rate_for_abi; /* hack until abi generator generates correct name */
 
-asset get_balance(account_name user, account_name token_contract, symbol_type symbol) {
-    accounts fromAcc(token_contract, user);
-    auto itr = fromAcc.find(symbol.name());
+asset get_balance(name user, name token_contract, symbol symbol) {
+    accounts fromAcc(token_contract, user.value);
+    auto itr = fromAcc.find(symbol.code().raw());
     if ( itr == fromAcc.end()) {
         /* balance was never created */
         return asset(0, symbol);
     }
-    const auto& userAcc = fromAcc.get(symbol.name());
+    const auto& userAcc = fromAcc.get(symbol.code().raw());
     return userAcc.balance;
 }
 
-void send(account_name from, account_name to, asset quantity, account_name dest_contract) {
+void send(name from, name to, asset quantity, name dest_contract) {
     action {
-        permission_level{from, N(active)},
+        permission_level{from, "active"_n},
         dest_contract,
-        N(transfer),
-        std::make_tuple(from, to, quantity, std::string("memo"))
+        "transfer"_n,
+        std::make_tuple(from, to, quantity, string("memo"))
     }.send();
 }
 

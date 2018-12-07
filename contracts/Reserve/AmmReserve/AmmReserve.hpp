@@ -3,6 +3,7 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/print.hpp>
 #include <eosiolib/asset.hpp>
+#include <eosiolib/singleton.hpp>
 #include "../../Common/common.hpp"
 
 CONTRACT AmmReserve : public contract {
@@ -11,20 +12,17 @@ CONTRACT AmmReserve : public contract {
         using contract::contract;
 
         TABLE state_t {
-            name    manager;
-            name    network_contract;
-            asset           token;
-            name    token_contract;
-            name    eos_contract;
-            bool            trade_enabled;
-            asset           collected_fees_in_tokens;
-            uint64_t        primary_key() const { return manager.value; }
-            EOSLIB_SERIALIZE(state_t, (manager)(network_contract)(token)(token_contract)
-                                      (eos_contract)(trade_enabled)(collected_fees_in_tokens))
+            name        network_contract;
+            asset       token;
+            name        token_contract;
+            name        eos_contract;
+            bool        trade_enabled;
+            asset       collected_fees_in_tokens;
+            EOSLIB_SERIALIZE(state_t, (network_contract)(token)(token_contract)(eos_contract)
+                                      (trade_enabled)(collected_fees_in_tokens))
         };
 
         TABLE params_t {
-            name        manager;
             double      r;
             double      p_min;
             asset       max_eos_cap_buy;
@@ -34,8 +32,7 @@ CONTRACT AmmReserve : public contract {
             double      min_buy_rate;
             double      max_sell_rate;
             double      min_sell_rate;
-            uint64_t    primary_key() const { return manager.value; }
-            EOSLIB_SERIALIZE(params_t, (manager)(r)(p_min)(max_eos_cap_buy)(max_eos_cap_sell)(fee_percent)
+            EOSLIB_SERIALIZE(params_t, (r)(p_min)(max_eos_cap_buy)(max_eos_cap_sell)(fee_percent)
                                        (max_buy_rate)(min_buy_rate)(max_sell_rate)(min_sell_rate))
         };
 
@@ -48,8 +45,12 @@ CONTRACT AmmReserve : public contract {
             EOSLIB_SERIALIZE(rate_t, (manager)(stored_rate)(dest_amount))
         };
 
-        typedef eosio::multi_index<"state"_n, state_t> state_type;
-        typedef eosio::multi_index<"params"_n, params_t> params_type;
+        typedef eosio::singleton<"state"_n, state_t> state_type;
+        typedef eosio::multi_index<"state"_n, state_t> dummy_state_for_abi; /* hack until abi generator generates correct name */
+
+        typedef eosio::singleton<"params"_n, params_t> params_type;
+        typedef eosio::multi_index<"params"_n, params_t> dummy_params_for_abi; /* hack until abi generator generates correct name */
+
         typedef eosio::multi_index<"rate"_n, rate_t> rate_type;
 
         ACTION init(name    network_contract,

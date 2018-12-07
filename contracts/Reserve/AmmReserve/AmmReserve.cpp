@@ -11,19 +11,17 @@ ACTION AmmReserve::init(name network_contract,
     require_auth(_self);
 
     state_type state_instance(_self, _self.value);
-    auto itr = state_instance.find(_self.value);
-    eosio_assert(itr == state_instance.end(), "init already called");
+    eosio_assert(!state_instance.exists(), "init already called");
 
-    state_instance.emplace(_self, [&](auto &s) {
-        s.manager = _self;
-        s.network_contract = network_contract;
-        s.token = token;
-        s.token_contract = token_contract;
-        s.eos_contract = eos_contract;
-        s.trade_enabled = enable_trade;
-        s.collected_fees_in_tokens = token;
-        s.collected_fees_in_tokens.amount = 0;
-    });
+    state_t new_state;
+    new_state.network_contract = network_contract;
+    new_state.token = token;
+    new_state.token_contract = token_contract;
+    new_state.eos_contract = eos_contract;
+    new_state.trade_enabled = enable_trade;
+    new_state.collected_fees_in_tokens = token;
+    new_state.collected_fees_in_tokens.amount = 0;
+    state_instance.set(new_state, _self);
 }
 
 ACTION AmmReserve::setparams(double r,
@@ -39,81 +37,61 @@ ACTION AmmReserve::setparams(double r,
     eosio_assert(min_sell_rate < max_sell_rate, "min_sell_rate not smaller than max_sell_rate");
 
     params_type params_instance(_self, _self.value);
-    auto itr = params_instance.find(_self.value);
-    if (itr != params_instance.end()) {
-        params_instance.modify(itr, _self, [&](auto &s) {
-            s.r = r;
-            s.p_min = p_min;
-            s.max_eos_cap_buy = max_eos_cap_buy;
-            s.max_eos_cap_sell = max_eos_cap_sell;
-            s.fee_percent = fee_percent;
-            s.max_buy_rate = 1.0 / min_sell_rate;
-            s.min_buy_rate = 1.0 / max_sell_rate;
-            s.max_sell_rate = max_sell_rate;
-            s.min_sell_rate = min_sell_rate;
-        });
-    } else {
-        params_instance.emplace(_self, [&](auto &s) {
-            s.manager = _self;
-            s.r = r;
-            s.p_min = p_min;
-            s.max_eos_cap_buy = max_eos_cap_buy;
-            s.max_eos_cap_sell = max_eos_cap_sell;
-            s.fee_percent = fee_percent;
-            s.max_buy_rate = 1.0 / min_sell_rate;
-            s.min_buy_rate = 1.0 / max_sell_rate;
-            s.max_sell_rate = max_sell_rate;
-            s.min_sell_rate = min_sell_rate;
-        });
-    }
+    params_t new_params;
+    new_params.r = r;
+    new_params.p_min = p_min;
+    new_params.max_eos_cap_buy = max_eos_cap_buy;
+    new_params.max_eos_cap_sell = max_eos_cap_sell;
+    new_params.fee_percent = fee_percent;
+    new_params.max_buy_rate = 1.0 / min_sell_rate;
+    new_params.min_buy_rate = 1.0 / max_sell_rate;
+    new_params.max_sell_rate = max_sell_rate;
+    new_params.min_sell_rate = min_sell_rate;
+    params_instance.set(new_params, _self);
 }
 
 ACTION AmmReserve::setnetwork(name network_contract) {
     require_auth(_self);
 
     state_type state_instance(_self, _self.value);
-    auto itr = state_instance.find(_self.value);
-    eosio_assert(itr != state_instance.end(), "init not called yet");
+    eosio_assert(state_instance.exists(), "init not called yet");
 
-    state_instance.modify(itr, _self, [&](auto &s) {
-        s.network_contract = network_contract;
-    });
+    auto s = state_instance.get();
+    s.network_contract = network_contract;
+    state_instance.set(s, _self);
 }
 
 ACTION AmmReserve::enabletrade() {
     require_auth(_self);
 
     state_type state_instance(_self, _self.value);
-    auto itr = state_instance.find(_self.value);
-    eosio_assert(itr != state_instance.end(), "init not called yet");
+    eosio_assert(state_instance.exists(), "init not called yet");
 
-    state_instance.modify(itr, _self, [&](auto &s) {
-        s.trade_enabled = true;
-    });
+    auto s = state_instance.get();
+    s.trade_enabled = true;
+    state_instance.set(s, _self);
 }
 
 ACTION AmmReserve::disabletrade() {
     require_auth(_self);
 
     state_type state_instance(_self, _self.value);
-    auto itr = state_instance.find(_self.value);
-    eosio_assert(itr != state_instance.end(), "init not called yet");
+    eosio_assert(state_instance.exists(), "init not called yet");
 
-    state_instance.modify(itr, _self, [&](auto &s) {
-        s.trade_enabled = false;
-    });
+    auto s = state_instance.get();
+    s.trade_enabled = false;
+    state_instance.set(s, _self);
 }
 
 ACTION AmmReserve::resetfee() {
     require_auth(_self);
 
     state_type state_instance(_self, _self.value);
-    auto itr = state_instance.find(_self.value);
-    eosio_assert(itr != state_instance.end(), "init not called yet");
+    eosio_assert(state_instance.exists(), "init not called yet");
 
-    state_instance.modify(itr, _self, [&](auto &s) {
-        s.collected_fees_in_tokens.amount = 0;
-    });
+    auto s = state_instance.get();
+    s.collected_fees_in_tokens.amount = 0;
+    state_instance.set(s, _self);
 }
 
 ACTION AmmReserve::getconvrate(asset src) {
@@ -144,15 +122,13 @@ double AmmReserve::reserve_get_conv_rate(asset      src,
 
     /* verify contract was init */
     state_type state_instance(_self, _self.value);
-    auto current_state_ptr = state_instance.find(_self.value);
-    if (current_state_ptr == state_instance.end()) return 0;
-    const auto &current_state = *current_state_ptr;
+    if (!state_instance.exists()) return 0;
+    auto current_state = state_instance.get();
 
     /* verify params were set */
     params_type params_instance(_self, _self.value);
-    auto current_params_ptr = params_instance.find(_self.value);
-    if (current_params_ptr == params_instance.end()) return 0;
-    const auto &current_params = *current_params_ptr;
+    if (!params_instance.exists()) return 0;
+    auto current_params = params_instance.get();
 
     /* we only allow network to get conversion rate since it actually writes to ram */
     require_auth(current_state.network_contract);
@@ -282,16 +258,14 @@ double AmmReserve::delta_e_func(const struct params_t &current_params, double e,
 void AmmReserve::reserve_trade(name from, asset quantity, string memo, name code) {
 
     state_type state_instance(_self, _self.value);
-    auto current_state_ptr = state_instance.find(_self.value);
-    eosio_assert(current_state_ptr != state_instance.end(), "init was not called");
-    const auto &current_state = *current_state_ptr;
+    eosio_assert(state_instance.exists(), "init was not called");
+    auto current_state= state_instance.get();
 
     eosio_assert(from == current_state.network_contract, "not coming from contract");
 
     params_type params_instance(_self, _self.value);
-    auto current_params_ptr = params_instance.find(_self.value);
-    eosio_assert(current_params_ptr != params_instance.end(), "params were not set");
-    const auto &current_params = *current_params_ptr;
+    eosio_assert(params_instance.exists(), "params were not set");
+    auto current_params = params_instance.get();
 
     eosio_assert(code == current_state.token_contract || code == current_state.eos_contract,
                  "needs to come from token contract or eos contract");
@@ -371,10 +345,9 @@ void AmmReserve::record_fees(const struct params_t &current_params,
     fees_amount = damount_to_amount(dfees, token.symbol.precision());
 
     state_type state_instance(_self, _self.value);
-    auto itr = state_instance.find(_self.value);
-    state_instance.modify(itr, _self, [&](auto &s) {
-        s.collected_fees_in_tokens.amount += fees_amount;
-    });
+    auto s = state_instance.get();
+    s.collected_fees_in_tokens.amount += fees_amount;
+    state_instance.set(s, _self);
 }
 
 void AmmReserve::transfer(name from, name to, asset quantity, string memo) {

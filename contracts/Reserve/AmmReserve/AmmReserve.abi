@@ -1,5 +1,5 @@
 {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Fri Dec  7 11:29:03 2018",
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Fri Dec  7 15:33:58 2018",
     "version": "eosio::abi/1.1",
     "structs": [
         {
@@ -52,10 +52,6 @@
             "name": "params_t",
             "base": "",
             "fields": [
-                {
-                    "name": "manager",
-                    "type": "name"
-                },
                 {
                     "name": "r",
                     "type": "float64"
@@ -165,10 +161,6 @@
             "name": "state_t",
             "base": "",
             "fields": [
-                {
-                    "name": "manager",
-                    "type": "name"
-                },
                 {
                     "name": "network_contract",
                     "type": "name"

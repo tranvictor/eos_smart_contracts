@@ -38,11 +38,9 @@ CONTRACT AmmReserve : public contract {
 
         /* TODO: the following is duplicated with common.hpp, see if can remove from here. */
         TABLE rate_t {
-            name        manager;
             double      stored_rate; /* TODO - adding hash/id to make sure we read correct rate? */
             uint64_t    dest_amount; /* TODO: make it an asset to comply with standard that amounts are assets, rates are double? */
-            uint64_t    primary_key() const { return manager.value; }
-            EOSLIB_SERIALIZE(rate_t, (manager)(stored_rate)(dest_amount))
+            EOSLIB_SERIALIZE(rate_t, (stored_rate)(dest_amount))
         };
 
         typedef eosio::singleton<"state"_n, state_t> state_type;

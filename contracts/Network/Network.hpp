@@ -41,11 +41,11 @@ CONTRACT Network : public contract {
 
         /* TODO: change to 2 lists of per_token_src and per_token_dest */
         TABLE reservespert_t {
-            symbol                  symbol;
-            name                    token_contract;
-            vector<name>       reserve_contracts;
-            uint8_t                 num_reserves;
-            uint64_t                primary_key() const { return symbol.raw(); }
+            symbol          symbol;
+            name            token_contract;
+            vector<name>    reserve_contracts;
+            uint8_t         num_reserves;
+            uint64_t        primary_key() const { return symbol.raw(); }
             EOSLIB_SERIALIZE(reservespert_t, (symbol)(token_contract)(reserve_contracts)(num_reserves))
         };
 

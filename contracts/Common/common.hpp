@@ -35,11 +35,9 @@ struct account {
 };
 
 struct rate_t {
-    name        manager;
     double      stored_rate;
     uint64_t    dest_amount;
-    uint64_t    primary_key() const { return manager.value; }
-    EOSLIB_SERIALIZE( rate_t, (manager)(stored_rate)(dest_amount) )
+    EOSLIB_SERIALIZE( rate_t, (stored_rate)(dest_amount) )
 };
 
 typedef eosio::multi_index<"accounts"_n, account> accounts;

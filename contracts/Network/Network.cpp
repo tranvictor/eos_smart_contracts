@@ -132,7 +132,6 @@ void Network::transfer(name from, name to, asset quantity, string memo) {
 }
 
 ACTION Network::trade1(memo_trade_structure memo_struct) {
-
     /* TODO: is this correct? */
     eosio_assert( _code == _self, "current action can only be called internally" );
 

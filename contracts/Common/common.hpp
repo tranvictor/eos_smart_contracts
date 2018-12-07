@@ -44,12 +44,12 @@ typedef eosio::multi_index<"rate"_n, rate_t> rate_type;
 
 asset get_balance(name user, name token_contract, symbol symbol) {
     accounts fromAcc(token_contract, user.value);
-    auto itr = fromAcc.find(symbol.raw());
+    auto itr = fromAcc.find(symbol.code().raw());
     if ( itr == fromAcc.end()) {
         /* balance was never created */
         return asset(0, symbol);
     }
-    const auto& userAcc = fromAcc.get(symbol.raw());
+    const auto& userAcc = fromAcc.get(symbol.code().raw());
     return userAcc.balance;
 }
 

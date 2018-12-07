@@ -2,11 +2,11 @@
 
 using namespace eosio;
 
-void AmmReserve::init(name network_contract,
-                      asset        token,
-                      name token_contract,
-                      name eos_contract,
-                      bool         enable_trade) {
+ACTION AmmReserve::init(name network_contract,
+                        asset        token,
+                        name token_contract,
+                        name eos_contract,
+                        bool         enable_trade) {
 
     require_auth(_self);
 
@@ -26,13 +26,13 @@ void AmmReserve::init(name network_contract,
     });
 }
 
-void AmmReserve::setparams(double r,
-                           double p_min,
-                           asset  max_eos_cap_buy,
-                           asset  max_eos_cap_sell,
-                           double fee_percent,
-                           double max_sell_rate,
-                           double min_sell_rate) {
+ACTION AmmReserve::setparams(double r,
+                             double p_min,
+                             asset  max_eos_cap_buy,
+                             asset  max_eos_cap_sell,
+                             double fee_percent,
+                             double max_sell_rate,
+                             double min_sell_rate) {
     require_auth(_self);
 
     eosio_assert(fee_percent < 100, "illegal fee_percent");
@@ -68,7 +68,7 @@ void AmmReserve::setparams(double r,
     }
 }
 
-void AmmReserve::setnetwork(name network_contract) {
+ACTION AmmReserve::setnetwork(name network_contract) {
     require_auth(_self);
 
     state_type state_instance(_self, _self.value);
@@ -80,7 +80,7 @@ void AmmReserve::setnetwork(name network_contract) {
     });
 }
 
-void AmmReserve::enabletrade() {
+ACTION AmmReserve::enabletrade() {
     require_auth(_self);
 
     state_type state_instance(_self, _self.value);
@@ -92,7 +92,7 @@ void AmmReserve::enabletrade() {
     });
 }
 
-void AmmReserve::disabletrade() {
+ACTION AmmReserve::disabletrade() {
     require_auth(_self);
 
     state_type state_instance(_self, _self.value);
@@ -104,7 +104,7 @@ void AmmReserve::disabletrade() {
     });
 }
 
-void AmmReserve::resetfee() {
+ACTION AmmReserve::resetfee() {
     require_auth(_self);
 
     state_type state_instance(_self, _self.value);
@@ -116,7 +116,7 @@ void AmmReserve::resetfee() {
     });
 }
 
-void AmmReserve::getconvrate(asset src) {
+ACTION AmmReserve::getconvrate(asset src) {
     double rate;
     uint64_t dest_amount;
 

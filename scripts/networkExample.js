@@ -65,8 +65,8 @@ async function main(){
         destTokenAccount: "eosio.token",
         maxDestAmount: 200000,
         minConversionRate: "0.000001",
-        walletId: "some_wallet_id",
-        hint: "some_hint"
+        walletId: "somewallid",
+        hint: "somehint"
     })
 
     const balanceAfter = await services.getUserBalance({

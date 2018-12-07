@@ -1,6 +1,6 @@
 {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Sun Dec  2 21:54:43 2018",
-    "version": "eosio::abi/1.0",
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Fri Dec  7 11:29:05 2018",
+    "version": "eosio::abi/1.1",
     "structs": [
         {
             "name": "addreserve",
@@ -93,7 +93,7 @@
             ]
         },
         {
-            "name": "reserve",
+            "name": "reserve_t",
             "base": "",
             "fields": [
                 {
@@ -103,7 +103,7 @@
             ]
         },
         {
-            "name": "reservespert",
+            "name": "reservespert_t",
             "base": "",
             "fields": [
                 {
@@ -116,7 +116,7 @@
                 },
                 {
                     "name": "reserve_contracts",
-                    "type": "uint64[]"
+                    "type": "name[]"
                 },
                 {
                     "name": "num_reserves",
@@ -135,7 +135,7 @@
             ]
         },
         {
-            "name": "state",
+            "name": "state_t",
             "base": "",
             "fields": [
                 {
@@ -243,26 +243,27 @@
     "tables": [
         {
             "name": "reserve",
-            "type": "reserve",
+            "type": "reserve_t",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
         },
         {
             "name": "reservespert",
-            "type": "reservespert",
+            "type": "reservespert_t",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
         },
         {
             "name": "state",
-            "type": "state",
+            "type": "state_t",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
         }
     ],
     "ricardian_clauses": [],
+    "variants": [],
     "abi_extensions": []
 }

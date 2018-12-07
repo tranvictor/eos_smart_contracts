@@ -12,93 +12,78 @@ using namespace std; /* TODO: can remove it and replace string with std::string 
 #define NOT_FOUND              -1
 
 struct memo_trade_structure {
-    account_name    trader;
-    account_name    src_contract; /* TODO: potentially read from storage since pair is listed. */
-    asset           src;
-    account_name    dest_contract; /* TODO: potentially read from storage since pair is listed. */
-    asset           dest;
-    account_name    dest_account;
-    uint64_t        max_dest_amount;
-    double          min_conversion_rate;
-    account_name    walletId;
-    std::string     hint; /* TODO: should hint be another type? */
+    name        trader;
+    name        src_contract; /* TODO: potentially read from storage since pair is listed. */
+    asset       src;
+    name        dest_contract; /* TODO: potentially read from storage since pair is listed. */
+    asset       dest;
+    name        dest_account;
+    uint64_t    max_dest_amount;
+    double      min_conversion_rate;
+    name        walletId;
+    std::string hint; /* TODO: should hint be another type? */
 };
 
-class Network : public contract {
+CONTRACT Network : public contract {
 
     public:
         using contract::contract;
 
-        Network(account_name self): contract(self),
-                                    state_table_inst(self,self),
-                                    reserves_table_inst(self,self),
-                                    reservespert_table_inst(self,self) {}
-
-        struct [[eosio::table]] state {
-            account_name    manager;
-            bool            is_enabled;
-            uint64_t        primary_key() const { return manager; }
-            EOSLIB_SERIALIZE( state, (manager)(is_enabled) )
+        TABLE state_t {
+            name        manager;
+            bool        is_enabled;
+            uint64_t    primary_key() const { return manager.value; }
+            EOSLIB_SERIALIZE(state_t, (manager)(is_enabled))
         };
 
-        struct [[eosio::table]] reserve {
-            account_name    contract;
-            uint64_t        primary_key() const { return contract; }
-            EOSLIB_SERIALIZE( reserve, (contract) )
+        TABLE reserve_t {
+            name        contract;
+            uint64_t    primary_key() const { return contract.value; }
+            EOSLIB_SERIALIZE(reserve_t, (contract))
         };
 
         /* TODO: change to 2 lists of per_token_src and per_token_dest */
-        struct [[eosio::table]] reservespert {
-            uint64_t                    symbol;
-            uint64_t                    token_contract;
-            std::vector<account_name>   reserve_contracts;
-            uint8_t                     num_reserves;
-            uint64_t                    primary_key() const { return symbol; }
-            EOSLIB_SERIALIZE(reservespert, (symbol)(token_contract)(reserve_contracts)(num_reserves))
+        TABLE reservespert_t {
+            uint64_t                symbol;
+            uint64_t                token_contract;
+            std::vector<name>       reserve_contracts;
+            uint8_t                 num_reserves;
+            uint64_t                primary_key() const { return symbol; }
+            EOSLIB_SERIALIZE(reservespert_t, (symbol)(token_contract)(reserve_contracts)(num_reserves))
         };
 
-        typedef eosio::multi_index<N(state), state> state_table;
-        typedef eosio::multi_index<N(reserve), reserve> reserves_table;
-        typedef eosio::multi_index<N(reservespert), reservespert> reservespert_table;
+        typedef eosio::multi_index<"state"_n, state_t> state_type;
+        typedef eosio::multi_index<"reserve"_n, reserve_t> reserves_type;
+        typedef eosio::multi_index<"reservespert"_n, reservespert_t> reservespert_type;
 
-        [[eosio::action]]
-         void setenable(bool enable);
+        ACTION setenable(bool enable);
 
-        [[eosio::action]]
-        void addreserve(account_name reserve, bool add);
+        ACTION addreserve(name reserve, bool add);
 
-        [[eosio::action]]
-        void listpairres(account_name reserve,
-                         asset token,
-                         account_name token_contract,
-                         bool eos_to_token,
-                         bool token_to_eos,
-                         bool add);
+        ACTION listpairres(name reserve,
+                           asset token,
+                           name token_contract,
+                           bool eos_to_token,
+                           bool token_to_eos,
+                           bool add);
 
-        [[eosio::action]]
-         void trade1(memo_trade_structure memo_struct);
+        ACTION trade1(memo_trade_structure memo_struct);
 
-        [[eosio::action]]
-         void trade2(account_name reserve,
-                     memo_trade_structure memo_struct,
-                     asset actual_src,
-                     asset actual_dest);
+        ACTION trade2(name reserve,
+                      memo_trade_structure memo_struct,
+                      asset actual_src,
+                      asset actual_dest);
 
-        [[eosio::action]]
-         void trade3(account_name reserve,
-                     memo_trade_structure memo_struct,
-                     asset actual_src,
-                     asset actual_dest,
-                     asset dest_before_trade);
+        ACTION trade3(name reserve,
+                      memo_trade_structure memo_struct,
+                      asset actual_src,
+                      asset actual_dest,
+                      asset dest_before_trade);
 
-        void apply(const account_name code, const account_name act);
+        void transfer(name from, name to, asset quantity, string memo);
 
     private:
-        state_table         state_table_inst;
-        reserves_table      reserves_table_inst;
-        reservespert_table  reservespert_table_inst;
-
-        void trade0(const struct transfer &transfer, const account_name code);
+        void trade0(const struct transfer &transfer, const name code);
 
         void calc_actuals(memo_trade_structure &memo_struct,
                           double rate_result,
@@ -106,9 +91,9 @@ class Network : public contract {
                           asset &actual_src,
                           asset &actual_dest);
 
-        int find_reserve(std::vector<account_name> reserve_list,
+        int find_reserve(std::vector<name> reserve_list,
                          uint8_t num_reserves,
-                         account_name reserve);
+                         name reserve);
 
         memo_trade_structure parse_memo(std::string memo);
 };

@@ -51,10 +51,9 @@ module.exports.getRate = async function(options) {
     let arrayLength = reservesReply.rows[0].num_reserves
     for (var i = 0; i < arrayLength; i++) {
         reserveName = reserveContractsList[i];
-        reserveStr = eos.modules.format.decodeName(reserveName, false)
         currentRate = await reserveServices.getRate({
             eos:eos,
-            reserveAccount:reserveStr,
+            reserveAccount:reserveName,
             eosTokenAccount:eosTokenAccount,
             srcSymbol:srcSymbol,
             destSymbol:destSymbol,

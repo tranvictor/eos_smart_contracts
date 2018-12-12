@@ -112,15 +112,10 @@ module.exports.trade = async function(options) {
     let walletId = options.walletId
     let hint = options.hint
 
-//    "alice,eosio.token,4 SYS,eosio.token,4 EOS,moshe,20,0.000001,some_wallet_id,some_hint" ]' -p alice@active
-
     let memo = `${userAccount},${srcTokenAccount},${srcPrecision} ${srcSymbol},` +
                `${destTokenAccount},${destPrecision} ${destSymbol},${destAccount},` +
                `${maxDestAmount},${minConversionRate},${walletId},${hint}`
     let asset = `${srcAmount} ${srcSymbol}`
-    
-    // console.log(memo)
-    // console.log(asset)
 
     const token = await eos.contract(srcTokenAccount);
     await token.transfer({from:userAccount, to:networkAccount, quantity:asset, memo:memo},

@@ -11,7 +11,7 @@ const AMOUNT_PRECISON = 0.0001
 const RATE_PRECISON =   0.00000001
 
 /* Assign keypairs. to accounts. Use unique name prefixes to prevent collisions between test modules. */
-const keyPairArray = JSON.parse(fs.readFileSync("scripts/keys.json"))
+const keyPairArray = JSON.parse(fs.readFileSync("tests/keys.json"))
 const tokenData =   {account: "nettoken",   publicKey: keyPairArray[0][0], privateKey: keyPairArray[0][1]}
 const reserve1Data = {account: "netreserve1", publicKey: keyPairArray[1][0], privateKey: keyPairArray[1][1]}
 const reserve2Data = {account: "netreserve2", publicKey: keyPairArray[2][0], privateKey: keyPairArray[2][1]}
@@ -176,7 +176,45 @@ describe('as non owner', () => {
         const balanceChange = balanceAfter - balanceBefore
         balanceChange.should.be.closeTo(calcDestAmount, AMOUNT_PRECISON);
     });
-    xit('buy dest amount > max dest amount', async function() {});
+    it('buy dest amount > max dest amount', async function() {
+        const balanceBefore = await getUserBalance({account:mosheData.account, symbol:'SYS', tokenContract:tokenData.account, eos:mosheData.eos})
+
+        let calcRate = await networkServices.getRate({
+            eos:networkData.eos,
+            srcSymbol:'EOS',
+            destSymbol:'SYS',
+            srcAmount:2.0132,
+            networkAccount:networkData.account,
+            eosTokenAccount:tokenData.account})
+        let calcOrigDestAmount = srcAmount * calcRate;
+        let maxDestAmount = calcOrigDestAmount / 2.0
+        let calcDestAmount = maxDestAmount
+        let maxDestAmountAsUint = parseInt(maxDestAmount * 10000)
+        
+
+        await networkServices.trade({
+            eos:aliceData.eos,
+            networkAccount:networkData.account,
+            userAccount:aliceData.account, 
+            srcAmount:"2.0132",
+            srcPrecision:4,
+            srcTokenAccount:tokenData.account,
+            srcSymbol:"EOS",
+            destPrecision:4,
+            destSymbol:"SYS",
+            destAccount:mosheData.account,
+            destTokenAccount:tokenData.account,
+            maxDestAmount:maxDestAmountAsUint,
+            minConversionRate:"0.000001",
+            walletId:"somewallid",
+            hint:"somehint"
+        })
+
+        const balanceAfter = await getUserBalance({account:mosheData.account, symbol:'SYS', tokenContract:tokenData.account, eos:mosheData.eos})
+        const balanceChange = balanceAfter - balanceBefore
+        balanceChange.should.be.closeTo(calcDestAmount, AMOUNT_PRECISON);
+
+    });
     it('sell while dest amount < max dest amount', async function() {
         const balanceBefore = await getUserBalance({account:mosheData.account, symbol:'EOS', tokenContract:tokenData.account, eos:mosheData.eos})
 
@@ -210,9 +248,45 @@ describe('as non owner', () => {
 
         const balanceAfter = await getUserBalance({account:mosheData.account, symbol:'EOS', tokenContract:tokenData.account, eos:mosheData.eos})
         const balanceChange = balanceAfter - balanceBefore
+
         balanceChange.should.be.closeTo(calcDestAmount, AMOUNT_PRECISON);
     });
 
-    xit('sell while dest amount > max dest amount', async function() {});
+    it('sell while dest amount > max dest amount', async function() {
+        const balanceBefore = await getUserBalance({account:mosheData.account, symbol:'SYS', tokenContract:tokenData.account, eos:mosheData.eos})
+
+        let calcRate = await networkServices.getRate({
+            eos:networkData.eos,
+            srcSymbol:'EOS',
+            destSymbol:'SYS',
+            srcAmount:2.4679,
+            networkAccount:networkData.account,
+            eosTokenAccount:tokenData.account})
+        let calcDestAmount = srcAmount * calcRate;
+        let maxDestAmount = parseInt(calcDestAmount * 10000 * 1.2)
+
+        await networkServices.trade({
+            eos:aliceData.eos,
+            networkAccount:networkData.account,
+            userAccount:aliceData.account, 
+            srcAmount:"2.4679",
+            srcPrecision:4,
+            srcTokenAccount:tokenData.account,
+            srcSymbol:"EOS",
+            destPrecision:4,
+            destSymbol:"SYS",
+            destAccount:mosheData.account,
+            destTokenAccount:tokenData.account,
+            maxDestAmount:maxDestAmount,
+            minConversionRate:"0.000001",
+            walletId:"somewallid",
+            hint:"somehint"
+        })
+
+        const balanceAfter = await getUserBalance({account:mosheData.account, symbol:'SYS', tokenContract:tokenData.account, eos:mosheData.eos})
+        const balanceChange = balanceAfter - balanceBefore
+
+        balanceChange.should.be.closeTo(calcDestAmount, AMOUNT_PRECISON);
+    });
 });
 

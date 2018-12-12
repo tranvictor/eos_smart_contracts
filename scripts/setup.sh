@@ -8,12 +8,6 @@ set -x
 
 PUBLIC_KEY=EOS5CYr5DvRPZvfpsUGrQ2SnHeywQn66iSbKKXn4JDTbFFr36TRTX
 EOSIO_DEV_KEY=EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
-COMPILE=false
-
-if [[ "$1" == "--compile" ]]; then COMPILE=true; fi
-echo "COMPILE=$COMPILE"
-
-if [[ $COMPILE == true ]]; then rm contracts/Token/*.wasm contracts/Token/*.abi contracts/Reserve/AmmReserve/*.wasm contracts/Reserve/AmmReserve/*.abi ; fi
 
 cleos create account eosio eosio.token $EOSIO_DEV_KEY # deploy token with eosio development key
 cleos create account eosio reserve $PUBLIC_KEY
@@ -24,7 +18,6 @@ cleos create account eosio reserve3 $PUBLIC_KEY
 cleos create account eosio alice $PUBLIC_KEY
 cleos create account eosio moshe $PUBLIC_KEY
 
-if [[ $COMPILE == true ]]; then cd contracts/Token/ ; eosio-cpp -o Token.wasm Token.cpp --abigen; cd ../../ ; fi
 cleos set contract eosio.token contracts/Token Token.wasm --abi Token.abi -p eosio.token@active
 
 #spread initial funds
@@ -40,7 +33,6 @@ cleos push action eosio.token issue '[ "reserve", "69.3000 EOS", "deposit" ]' -p
 #deploy reserve
 cleos set account permission reserve active "{\"threshold\": 1, \"keys\":[{\"key\":\"$PUBLIC_KEY\", \"weight\":1}] , \"accounts\":[{\"permission\":{\"actor\":\"reserve\",\"permission\":\"eosio.code\"},\"weight\":1}], \"waits\":[] }" owner -p reserve
 
-if [[ $COMPILE == true ]]; then cd contracts/Reserve/AmmReserve ; eosio-cpp -o AmmReserve.wasm AmmReserve.cpp --abigen ; cd ../../.. ; fi
 cleos set contract reserve contracts/Reserve/AmmReserve AmmReserve.wasm -p reserve@active
 
 #account_name network_contract, asset token_asset, account_name token_contract, account_name eos_contract, bool trade_enabled
@@ -64,7 +56,6 @@ cleos push action eosio.token transfer '[ "network", "reserve", "0.0100 EOS", "a
 
 #deploy network
 cleos set account permission network active "{\"threshold\": 1, \"keys\":[{\"key\":\"$PUBLIC_KEY\", \"weight\":1}] , \"accounts\":[{\"permission\":{\"actor\":\"network\",\"permission\":\"eosio.code\"},\"weight\":1}], \"waits\":[] }" owner -p network
-if [[ $COMPILE == true ]]; then cd contracts/Network/ ; eosio-cpp -o Network.wasm Network.cpp --abigen ; cd ../../ ; fi
 cleos set contract network contracts/Network Network.wasm -p network@active
 
 cleos push action network setenable '[ true ]' -p network@active

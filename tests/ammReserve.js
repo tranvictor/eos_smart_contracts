@@ -11,7 +11,7 @@ const AMOUNT_PRECISON = 0.0001
 const RATE_PRECISON =   0.00000001
 
 /* Assign keypairs. to accounts. Use unique name prefixes to prevent collisions between test modules. */
-const keyPairArray = JSON.parse(fs.readFileSync("scripts/keys.json"))
+const keyPairArray = JSON.parse(fs.readFileSync("tests/keys.json"))
 const tokenData =   {account: "ammtoken",   publicKey: keyPairArray[0][0], privateKey: keyPairArray[0][1]}
 const reserveData = {account: "ammreserve", publicKey: keyPairArray[1][0], privateKey: keyPairArray[1][1]}
 const aliceData =   {account: "ammalice",   publicKey: keyPairArray[2][0], privateKey: keyPairArray[2][1]}

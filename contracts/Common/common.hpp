@@ -110,6 +110,10 @@ uint64_t damount_to_amount(double damount, uint64_t precision) {
     return uint64_t(damount * double(pow(10, precision)));
 }
 
+uint64_t damount_to_ceil_amount(double damount, uint64_t precision) {
+    return uint64_t(ceil(damount * double(pow(10, precision))));
+}
+
 double asset_to_damount(asset quantity) {
     return (quantity.amount / double(pow(10, quantity.symbol.precision())));
 }
@@ -121,7 +125,8 @@ uint64_t calc_src_amount(double rate,
 
     double dest_damount = amount_to_damount(dest_amount, dest_precision);
     double src_damount = dest_damount / rate;
-    uint64_t src_amount = damount_to_amount(src_damount, src_precision);
+    /* source quantity is rounded up. to avoid dest quantity being too low. */
+    uint64_t src_amount = damount_to_ceil_amount(src_damount, src_precision);
 
     return src_amount;
 }

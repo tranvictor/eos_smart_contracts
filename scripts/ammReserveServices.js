@@ -57,7 +57,7 @@ function buyRate(currentParams, e, deltaE) {
 }
 
 function buyRateZeroQuantity(currentParams, e) {
-    let ratePreReduction = 1 / pOfE(currentParams, e);
+    let ratePreReduction = 1 / pOfE(currentParams.r, currentParams.pMin, e);
     return valueAfterReducingFee(currentParams, ratePreReduction);
 }
 
@@ -68,7 +68,7 @@ function sellRate(currentParams, e, srcAmount, deltaT) {
 }
 
 function sellRateZeroQuantity(currentParams, e) {
-    let ratePreReduction = pOfE(currentParams, e);
+    let ratePreReduction = pOfE(currentParams.r, currentParams.pMin, e);
     return valueAfterReducingFee(currentParams, ratePreReduction);
 }
 
@@ -86,7 +86,7 @@ function deltaEFunc(currentParams, e, deltaT) {
            currentParams.r;
 }
 
-function pOfE(r, pMin, e) { 
+function pOfE(r, pMin, e) {
     return pMin * Math.exp(r * e); 
 }
 

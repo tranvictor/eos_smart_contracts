@@ -12,6 +12,7 @@ const publicKey = "EOS5CYr5DvRPZvfpsUGrQ2SnHeywQn66iSbKKXn4JDTbFFr36TRTX"
 const aliceAccount = "alice"
 const mosheAccount = "moshe"
 const networkAccount = "network"
+const eosTokenAccount = "eosio.token"
 
 const eos = Eos( {keyProvider: [ privateKeyDefault, privateKey ] /* , verbose: 'false' */ } )
 
@@ -25,22 +26,24 @@ async function main(){
     })
     console.log(balances)
 
-    const enabled = await services.getEnabled(eos);
+    const enabled = await services.getEnabled({eos:eos, networkAccount:networkAccount});
     console.log(enabled)
 
     /* TODO: missing slippageRate calculation */
 
-    let rate = await services.getRate({eos:eos, srcSymbol:'EOS', destSymbol:'SYS', srcAmount:0.0100})
+    let rate = await services.getRate({eos:eos, srcSymbol:'EOS', destSymbol:'SYS', srcAmount:0.0100, networkAccount:networkAccount, eosTokenAccount:eosTokenAccount})
     console.log(rate)
 
-    rate = await services.getRate({eos:eos, srcSymbol:'EOS', destSymbol:'SYS', srcAmount:0})
+    rate = await services.getRate({eos:eos, srcSymbol:'EOS', destSymbol:'SYS', srcAmount:0, networkAccount:networkAccount, eosTokenAccount:eosTokenAccount})
     console.log(rate)
 
     const rates = await services.getRates({
         eos:eos,
         srcSymbols:['EOS','SYS'],
         destSymbols:['SYS','EOS'],
-        srcAmounts:[0.0100, 0.0100]
+        srcAmounts:[0.0100, 0.0100],
+        networkAccount:networkAccount,
+        eosTokenAccount:eosTokenAccount
     })
     console.log(rates)
 
@@ -54,6 +57,7 @@ async function main(){
 
     await services.trade({
         eos: eos,
+        networkAccount: networkAccount,
         userAccount: aliceAccount, 
         srcAmount: "0.0100",
         srcPrecision: 4,

@@ -77,11 +77,6 @@ before("setup accounts, contracts and initial funds", async () => {
         },{authorization: `${reserveData.account}@active`});
 })
 
-beforeEach('create contracts', async function () {
-    /* init reserve */
-    /* set params */
-});
-
 describe('As reserve owner', () => {
 
     xit('init a reserve', async function() {});
@@ -155,9 +150,6 @@ describe('as non owner', () => {
         const p = reserve.getconvrate({src: "0.0000 EOS"},{authorization: `${aliceData.account}@active`});
         await ensureContractAssertionError(p, "Missing required authority");
     });
-});
-
-describe('as anyone', () => {
     it('buy', async function() {
         /* calc expected rate offline*/
         let calcRate = await reserveServices.getRate({ srcAmount: 2.3110, srcSymbol:"EOS", destSymbol:"SYS", eos:reserveData.eos, reserveAccount:reserveData.account, eosTokenAccount:tokenData.account})
@@ -172,7 +164,6 @@ describe('as anyone', () => {
                              {authorization: [`${networkData.account}@active`]});
 
         const balanceAfter = await getUserBalance({account:mosheData.account, symbol:'SYS', tokenContract:tokenData.account, eos:mosheData.eos})
-
         const balanceChange = balanceAfter - balanceBefore
         balanceChange.should.be.closeTo(calcDestAmount, AMOUNT_PRECISON);
         

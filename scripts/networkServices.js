@@ -1,6 +1,4 @@
 const reserveServices = require('./ammReserveServices')
-const networkAccount = "network"
-const eosTokenAccount = "eosio.token"
 
 module.exports.getBalances = async function(options){
     let eos = options.eos
@@ -21,9 +19,12 @@ module.exports.getBalances = async function(options){
     return balances
 }
 
-module.exports.getEnabled = async function(eos){
+module.exports.getEnabled = async function(options){
+    let eos = options.eos
+    let networkAccount = options.networkAccount
+
     let state = await eos.getTableRows({
-        code: networkAccount,
+        code:networkAccount,
         scope:networkAccount,
         table:"state",
         json: true
@@ -38,6 +39,8 @@ module.exports.getRate = async function(options) {
     srcSymbol = options.srcSymbol
     destSymbol = options.destSymbol
     srcAmount = options.srcAmount
+    networkAccount = options.networkAccount
+    eosTokenAccount = options.eosTokenAccount
 
     let reservesReply = await eos.getTableRows({
         code: networkAccount,
@@ -73,6 +76,8 @@ module.exports.getRates = async function(options) {
     srcSymbols = options.srcSymbols
     destSymbols = options.destSymbols
     srcAmounts = options.srcAmounts
+    networkAccount = options.networkAccount
+    eosTokenAccount = options.eosTokenAccount
 
     let arrayLength = srcSymbols.length
     let ratesArray = []
@@ -81,7 +86,9 @@ module.exports.getRates = async function(options) {
             eos:eos,
             srcSymbol:srcSymbols[i],
             destSymbol:destSymbols[i],
-            srcAmount:srcAmounts[i]
+            srcAmount:srcAmounts[i],
+            networkAccount:networkAccount,
+            eosTokenAccount:eosTokenAccount
         })
         ratesArray.push(rate)
     }
@@ -90,6 +97,7 @@ module.exports.getRates = async function(options) {
 
 module.exports.trade = async function(options) {
     let eos = options.eos
+    let networkAccount = options.networkAccount
     let userAccount = options.userAccount 
     let srcAmount = options.srcAmount
     let srcPrecision = options.srcPrecision
@@ -111,16 +119,12 @@ module.exports.trade = async function(options) {
                `${maxDestAmount},${minConversionRate},${walletId},${hint}`
     let asset = `${srcAmount} ${srcSymbol}`
     
-    console.log(memo)
-    console.log(asset)
+    // console.log(memo)
+    // console.log(asset)
 
-    await eos.transfer(
-            userAccount,
-            networkAccount,
-            asset, //'0.0100 EOS',
-            memo,
-            {authorization: userAccount}
-    )
+    const token = await eos.contract(srcTokenAccount);
+    await token.transfer({from:userAccount, to:networkAccount, quantity:asset, memo:memo},
+                         {authorization: [`${userAccount}@active`]});
 }
 
 module.exports.getUserBalance = async function(options){

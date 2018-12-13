@@ -66,12 +66,12 @@ cleos push action network addreserve '[ "reserve3", false ]' -p network@active
 
 cleos push action network addreserve '[ "reserve", true ]' -p network@active
 
-cleos push action network listpairres '[ "reserve", "0.0000 SYS", "eosio.token", true, true, true ]' -p network@active
-cleos push action network listpairres '[ "reserve1", "0.0000 SYS", "eosio.token", true, true, true ]' -p network@active
-cleos push action network listpairres '[ "reserve2", "0.0000 SYS", "eosio.token", true, true, true ]' -p network@active
+cleos push action network listpairres '[ "reserve", "0.0000 SYS", "eosio.token", true ]' -p network@active
+cleos push action network listpairres '[ "reserve1", "0.0000 SYS", "eosio.token", true ]' -p network@active
+cleos push action network listpairres '[ "reserve2", "0.0000 SYS", "eosio.token", true ]' -p network@active
 
-cleos push action network listpairres '[ "reserve1", "0.0000 SYS", "eosio.token", false, false, false ]' -p network@active
-cleos push action network listpairres '[ "reserve2", "0.0000 SYS", "eosio.token", false, false, false ]' -p network@active
+cleos push action network listpairres '[ "reserve1", "0.0000 SYS", "eosio.token", false ]' -p network@active
+cleos push action network listpairres '[ "reserve2", "0.0000 SYS", "eosio.token", false ]' -p network@active
 
 cleos get table network network reservespert
 cleos get table reserve reserve rate

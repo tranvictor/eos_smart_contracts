@@ -48,7 +48,7 @@ $jleos set contract $NETWORK_ACCOUNT contracts/Network Network.wasm --abi Networ
 
 $jleos push action $NETWORK_ACCOUNT setenable '[ true ]' -p $NETWORK_ACCOUNT@active
 $jleos push action $NETWORK_ACCOUNT addreserve "[ \"$RESERVE_ACCOUNT\", true ]" -p $NETWORK_ACCOUNT@active
-$jleos push action $NETWORK_ACCOUNT listpairres "[ \"$RESERVE_ACCOUNT\", \"0.0000 SYS\", \"$EOS_ACCOUNT\", true, true, true ]" -p $NETWORK_ACCOUNT@active
+$jleos push action $NETWORK_ACCOUNT listpairres "[ \"$RESERVE_ACCOUNT\", \"0.0000 SYS\", \"$EOS_ACCOUNT\", true ]" -p $NETWORK_ACCOUNT@active
 
 $jleos get table $NETWORK_ACCOUNT $NETWORK_ACCOUNT reservespert
 

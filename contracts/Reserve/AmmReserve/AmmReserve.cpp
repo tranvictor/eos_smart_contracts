@@ -113,6 +113,7 @@ double AmmReserve::reserve_get_conv_rate(asset      src,
 
     /* verify contract was init */
     state_type state_instance(_self, _self.value);
+    /* if reserve is not ready return gracefully to allow other rate queries in network */
     if (!state_instance.exists()) return 0;
     auto current_state = state_instance.get();
 
@@ -343,7 +344,8 @@ void AmmReserve::record_fees(const struct params_t &current_params,
 
 void AmmReserve::transfer(name from, name to, asset quantity, string memo) {
 
-    /* only owner can withdraw funds (also checked in the token contract) */
+    /* if getting notified on a withdrawal, allow it.
+     * also if funds sent here recursively somehow do not continue with trade*/
     if (from == _self) return;
 
     /* if getting notified on an action that does not send funds here, do nothing. */

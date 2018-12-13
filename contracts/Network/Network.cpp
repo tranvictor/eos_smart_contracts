@@ -3,7 +3,6 @@
 
 ACTION Network::setenable(bool enable) {
     require_auth( _self );
-    /* TODO - add more assertions here. */
 
     state_type state_table_inst(_self, _self.value);
     state_t s;
@@ -13,7 +12,6 @@ ACTION Network::setenable(bool enable) {
 
 ACTION Network::addreserve(name reserve, bool add) {
     require_auth( _self );
-    /* TODO - add more assertions here. */
 
     reserves_type reserves_table_inst(_self, _self.value);
     auto itr = reserves_table_inst.find(reserve.value);
@@ -31,13 +29,9 @@ ACTION Network::addreserve(name reserve, bool add) {
 ACTION Network::listpairres(name reserve,
                             asset token,
                             name token_contract,
-                            bool eos_to_token, /* unused */
-                            bool token_to_eos, /* unused */
                             bool add
 ) {
     require_auth( _self );
-    /* TODO - add more assertions here. */
-    /* TODO - actually use eos_to_token and token_to_eos */
 
     reserves_type reserves_table_inst(_self, _self.value);
     auto reserve_exists = (reserves_table_inst.find(reserve.value) != reserves_table_inst.end());
@@ -89,7 +83,12 @@ ACTION Network::listpairres(name reserve,
 
 void Network::transfer(name from, name to, asset quantity, string memo) {
 
-    if (to != _self) return; /* TODO: is this ok? */
+    /* if getting notified on a withdrawal, allow it.
+     * also if funds sent here recursively somehow do not continue with trade*/
+    if (from == _self) return;
+
+    /* if getting notified on an action that does not send funds here, do nothing. */
+    if (to != _self) return;
 
     state_type state_table_inst(_self, _self.value);
     eosio_assert(state_table_inst.exists(), "trade not enabled");
@@ -97,12 +96,9 @@ void Network::transfer(name from, name to, asset quantity, string memo) {
     eosio_assert(quantity.is_valid(), "invalid transfer");
 
     auto memo_struct = parse_memo(memo);
-    /*
-     TODO: should we have such verification? how?
-     eosio_assert(code == memo_struct.src_contract, "src token contract must match memo.");
-     */
-    eosio_assert(quantity.symbol == memo_struct.src.symbol,
-                 "src token symbol must match memo.");
+
+    eosio_assert(_code == memo_struct.src_contract, "src token contract must match memo.");
+    eosio_assert(quantity.symbol == memo_struct.src.symbol, "src token symbol must match memo.");
 
     reservespert_type reservespert_table_inst(_self, _self.value);
     auto itr = (quantity.symbol != EOS_SYMBOL) ?
@@ -132,7 +128,6 @@ void Network::transfer(name from, name to, asset quantity, string memo) {
 }
 
 ACTION Network::trade1(memo_trade_structure memo_struct) {
-    /* TODO: is this correct? */
     eosio_assert( _code == _self, "current action can only be called internally" );
 
     /* read stored rates from all reserves that hold the pair */
@@ -185,7 +180,6 @@ ACTION Network::trade2(name reserve,
                      asset actual_src,
                      asset actual_dest) {
 
-    /* TODO: is this correct? */
     eosio_assert( _code == _self, "current action can only be called internally" );
 
     /* store dest balance to help verify later that dest amount was received. */
@@ -221,7 +215,6 @@ ACTION Network::trade3(name reserve,
                      asset actual_dest,
                      asset dest_before_trade) {
 
-    /* TODO: is this correct? */
     eosio_assert( _code == _self, "current action can only be called internally" );
 
     /* verify dest balance was indeed added to dest account */

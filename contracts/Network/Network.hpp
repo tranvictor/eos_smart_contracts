@@ -12,9 +12,9 @@ using namespace eosio;
 
 struct memo_trade_structure {
     name        trader;
-    name        src_contract; /* TODO: potentially read from storage since pair is listed. */
+    name        src_contract;
     asset       src;
-    name        dest_contract; /* TODO: potentially read from storage since pair is listed. */
+    name        dest_contract;
     asset       dest;
     name        dest_account;
     uint64_t    max_dest_amount;
@@ -61,8 +61,6 @@ CONTRACT Network : public contract {
         ACTION listpairres(name reserve,
                            asset token,
                            name token_contract,
-                           bool eos_to_token,
-                           bool token_to_eos,
                            bool add);
 
         ACTION trade1(memo_trade_structure memo_struct);

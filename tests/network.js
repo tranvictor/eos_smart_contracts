@@ -114,22 +114,14 @@ before("setup accounts, contracts and initial funds", async () => {
     await network.addreserve({reserve:reserve1Data.account, add:1},{authorization: `${networkData.account}@active`});
     await network.addreserve({reserve:reserve2Data.account, add:1},{authorization: `${networkData.account}@active`});
 
-    await network.listpairres({
-        reserve:reserve1Data.account,
-        token:"0.0000 SYS",
-        token_contract:tokenData.account,
-        eos_to_token:1,
-        token_to_eos:1,
-        add: 1
-        },{authorization: `${networkData.account}@active`});
+    await network.listpairres({add: 1, reserve:reserve1Data.account, token:"0.0000 SYS", token_contract:tokenData.account},
+                              {authorization: `${networkData.account}@active`});
 
     /*
     await network.listpairres({
         reserve:reserve2Data.account,
         token:"0.0000 SYS",
         token_contract:tokenData.account,
-        eos_to_token:1,
-        token_to_eos:1,
         add: 1
         },{authorization: `${networkData.account}@active`});
 */

@@ -6,7 +6,7 @@ ACTION AmmReserve::init(name network_contract,
                         asset        token,
                         name token_contract,
                         name eos_contract,
-                        bool         enable_trade) {
+                        bool enable_trade) {
 
     require_auth(_self);
 

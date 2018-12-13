@@ -5,7 +5,7 @@ const path = require('path');
 const assert = require('chai').should();
 
 const { ensureContractAssertionError, snooze, getUserBalance, addCodeToPerm} = require('./utils');
-const reserveServices = require('../scripts/ammReserveServices')
+const reserveServices = require('../scripts/services/ammReserveServices')
 
 const AMOUNT_PRECISON = 0.0001
 const RATE_PRECISON =   0.00000001

@@ -79,6 +79,8 @@ CONTRACT Network : public contract {
                       asset actual_dest,
                       asset dest_before_trade);
 
+        ACTION withdraw(name to, asset quantity, name dest_contract);
+
         void transfer(name from, name to, asset quantity, string memo);
 
     private:

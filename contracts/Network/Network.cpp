@@ -99,6 +99,14 @@ ACTION Network::listpairres(name reserve,
     }
 }
 
+ACTION Network::withdraw(name to, asset quantity, name dest_contract) {
+    state_type state_instance(_self, _self.value);
+    eosio_assert(state_instance.exists(), "init not called yet");
+    require_auth(state_instance.get().owner);
+
+    send(_self, to, quantity, dest_contract);
+}
+
 void Network::trade0(name from, name to, asset quantity, string memo) {
     eosio_assert(memo.length() > 0, "needs a memo with transaction details");
     eosio_assert(quantity.is_valid(), "invalid transfer");
@@ -330,7 +338,7 @@ extern "C" {
         }
         if (code == receiver){
             switch( action ) {
-                EOSIO_DISPATCH_HELPER( Network, (init)(setenable)(addreserve)(listpairres)
+                EOSIO_DISPATCH_HELPER( Network, (init)(setenable)(addreserve)(listpairres)(withdraw)
                                                 (trade1)(trade2)(trade3))
             }
         }

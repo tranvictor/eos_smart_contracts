@@ -1,5 +1,5 @@
 {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Tue Dec 18 22:13:58 2018",
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Tue Dec 18 23:15:56 2018",
     "version": "eosio::abi/1.1",
     "structs": [
         {
@@ -211,6 +211,24 @@
                     "type": "asset"
                 }
             ]
+        },
+        {
+            "name": "withdraw",
+            "base": "",
+            "fields": [
+                {
+                    "name": "to",
+                    "type": "name"
+                },
+                {
+                    "name": "quantity",
+                    "type": "asset"
+                },
+                {
+                    "name": "dest_contract",
+                    "type": "name"
+                }
+            ]
         }
     ],
     "types": [],
@@ -248,6 +266,11 @@
         {
             "name": "trade3",
             "type": "trade3",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "withdraw",
+            "type": "withdraw",
             "ricardian_contract": ""
         }
     ],

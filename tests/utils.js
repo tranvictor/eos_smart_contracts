@@ -43,12 +43,11 @@ async function getCurrentPermissions(eos, accountName) {
 
 const renouncePermToOnlyCode = async function(eos, accountName) {
     const perms = await getCurrentPermissions(eos, accountName)
-    console.log('Current permissions =>', JSON.stringify(perms))
+    // console.log('Current permissions =>', JSON.stringify(perms))
     perms[0]['required_auth']['accounts'] = [{"permission":{"actor":accountName,"permission":"eosio.code"},"weight":1}]
     perms[0]['required_auth']['keys'] = []
     perms[1]['required_auth']['accounts'] = [{"permission":{"actor":accountName,"permission":"eosio.code"},"weight":1}]
     perms[1]['required_auth']['keys'] = []
-    console.log('Afterwatds permissions =>', JSON.stringify(perms))
 
     const updateAuthResult = await eos.transaction(tr => {
           for(const perm of perms) {

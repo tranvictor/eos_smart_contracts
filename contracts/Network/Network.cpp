@@ -1,17 +1,32 @@
 #include "./Network.hpp"
 #include <math.h>
 
-ACTION Network::setenable(bool enable) {
-    require_auth( _self );
+ACTION Network::init(name owner, bool enable) {
+    require_auth(_self);
 
-    state_type state_table_inst(_self, _self.value);
-    state_t s;
+    state_type state_instance(_self, _self.value);
+    eosio_assert(!state_instance.exists(), "init already called");
+
+    state_t new_state;
+    new_state.owner = owner;
+    new_state.is_enabled = enable;
+    state_instance.set(new_state, _self);
+}
+
+ACTION Network::setenable(bool enable) {
+    state_type state_instance(_self, _self.value);
+    eosio_assert(state_instance.exists(), "init not called yet");
+    require_auth(state_instance.get().owner);
+
+    auto s = state_instance.get();
     s.is_enabled = enable;
-    state_table_inst.set(s, _self);
+    state_instance.set(s, _self);
 }
 
 ACTION Network::addreserve(name reserve, bool add) {
-    require_auth( _self );
+    state_type state_instance(_self, _self.value);
+    eosio_assert(state_instance.exists(), "init not called yet");
+    require_auth(state_instance.get().owner);
 
     reserves_type reserves_table_inst(_self, _self.value);
     auto itr = reserves_table_inst.find(reserve.value);
@@ -31,7 +46,9 @@ ACTION Network::listpairres(name reserve,
                             name token_contract,
                             bool add
 ) {
-    require_auth( _self );
+    state_type state_instance(_self, _self.value);
+    eosio_assert(state_instance.exists(), "init not called yet");
+    require_auth(state_instance.get().owner);
 
     reserves_type reserves_table_inst(_self, _self.value);
     auto reserve_exists = (reserves_table_inst.find(reserve.value) != reserves_table_inst.end());
@@ -81,17 +98,10 @@ ACTION Network::listpairres(name reserve,
     }
 }
 
-void Network::transfer(name from, name to, asset quantity, string memo) {
-
-    /* if getting notified on a withdrawal, allow it.
-     * also if funds sent here recursively somehow do not continue with trade*/
-    if (from == _self) return;
-
-    /* if getting notified on an action that does not send funds here, do nothing. */
-    if (to != _self) return;
+void Network::trade0(name from, name to, asset quantity, string memo) {
 
     state_type state_table_inst(_self, _self.value);
-    eosio_assert(state_table_inst.exists(), "trade not enabled");
+    eosio_assert(state_table_inst.exists(), "init not called");
     eosio_assert(memo.length() > 0, "needs a memo with transaction details");
     eosio_assert(quantity.is_valid(), "invalid transfer");
 
@@ -286,6 +296,34 @@ memo_trade_structure Network::parse_memo(string memo) {
     return res;
 }
 
+void Network::transfer(name from, name to, asset quantity, string memo) {
+
+    if (from == _self) {
+        /* allow this contract to send funds (by code) and withdraw funds (by owner or self).
+         * after self renounces its authorities only owner can withdraw. */
+        return;
+    }
+
+    state_type state_instance(_self, _self.value);
+    if (to == _self) {
+        if (!state_instance.exists()) {
+            /* if init not called yet allow anyone to deposit. */
+            return;
+        }
+
+        auto current_state = state_instance.get();
+        if (from == current_state.owner) {
+            /* owner can (only) deposit funds */
+            return;
+        } else {
+            /* this is a trade */
+            trade0(from, to, quantity, memo);
+            return;
+        }
+    }
+    eosio_assert(false, "unreachable code");
+}
+
 extern "C" {
     [[noreturn]] void apply(uint64_t receiver, uint64_t code, uint64_t action) {
 
@@ -294,7 +332,7 @@ extern "C" {
         }
         if (code == receiver){
             switch( action ) {
-                EOSIO_DISPATCH_HELPER( Network, (setenable)(addreserve)(listpairres)
+                EOSIO_DISPATCH_HELPER( Network, (init)(setenable)(addreserve)(listpairres)
                                                 (trade1)(trade2)(trade3))
             }
         }

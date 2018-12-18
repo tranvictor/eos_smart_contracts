@@ -29,8 +29,9 @@ CONTRACT Network : public contract {
         using contract::contract;
 
         TABLE state_t {
+            name        owner;
             bool        is_enabled;
-            EOSLIB_SERIALIZE(state_t, (is_enabled))
+            EOSLIB_SERIALIZE(state_t, (owner)(is_enabled))
         };
 
         TABLE reserve_t {
@@ -53,6 +54,8 @@ CONTRACT Network : public contract {
         typedef eosio::multi_index<"state"_n, state_t> dummy_state_for_abi; /* hack until abi generator generates correct name */
         typedef eosio::multi_index<"reserve"_n, reserve_t> reserves_type;
         typedef eosio::multi_index<"reservespert"_n, reservespert_t> reservespert_type;
+
+        ACTION init(name owner, bool enable);
 
         ACTION setenable(bool enable);
 
@@ -79,7 +82,7 @@ CONTRACT Network : public contract {
         void transfer(name from, name to, asset quantity, string memo);
 
     private:
-        void trade0(const struct transfer &transfer, const name code);
+        void trade0(name from, name to, asset quantity, string memo);
 
         void calc_actuals(memo_trade_structure &memo_struct,
                           double rate_result,

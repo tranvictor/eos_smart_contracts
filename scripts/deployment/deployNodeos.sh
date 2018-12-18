@@ -11,7 +11,9 @@ EOSIO_DEV_KEY=EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 
 cleos create account eosio eosio.token $EOSIO_DEV_KEY # deploy token with eosio development key
 cleos create account eosio reserve $PUBLIC_KEY
+cleos create account eosio resowner $PUBLIC_KEY
 cleos create account eosio network $PUBLIC_KEY
+cleos create account eosio netowner $PUBLIC_KEY
 cleos create account eosio reserve1 $PUBLIC_KEY
 cleos create account eosio reserve2 $PUBLIC_KEY
 cleos create account eosio reserve3 $PUBLIC_KEY
@@ -35,11 +37,11 @@ cleos set account permission reserve active "{\"threshold\": 1, \"keys\":[{\"key
 
 cleos set contract reserve contracts/Reserve/AmmReserve AmmReserve.wasm -p reserve@active
 
-#account_name network_contract, asset token_asset, account_name token_contract, account_name eos_contract, bool trade_enabled
-cleos push action reserve init '["network", "0.0000 SYS", "eosio.token", "eosio.token", true ]' -p reserve@active
+#account_name network_contract owner, account_name network_contract, asset token_asset, account_name token_contract, account_name eos_contract, bool trade_enabled
+cleos push action reserve init '["resowner", "network", "0.0000 SYS", "eosio.token", "eosio.token", true ]' -p reserve@active
 #double r, double p_min, asset  max_eos_cap_buy, asset  max_eos_cap_sell, double fee_percent, double max_sell_rate, double min_sell_rate
-cleos push action reserve setparams '[ "0.01", "0.05", "20.0000 EOS", "20.0000 EOS", "0.25", "0.5555", "0.00000555" ]' -p reserve@active
-cleos push action reserve enabletrade '[ ]' -p reserve@active
+cleos push action reserve setparams '[ "0.01", "0.05", "20.0000 EOS", "20.0000 EOS", "0.25", "0.5555", "0.00000555" ]' -p resowner@active
+cleos push action reserve enabletrade '[ ]' -p resowner@active
 
 #get conversion rate for buy
 cleos push action reserve getconvrate '[ "0.0100 EOS"]' -p network@active
@@ -58,20 +60,20 @@ cleos push action eosio.token transfer '[ "network", "reserve", "0.0100 EOS", "a
 cleos set account permission network active "{\"threshold\": 1, \"keys\":[{\"key\":\"$PUBLIC_KEY\", \"weight\":1}] , \"accounts\":[{\"permission\":{\"actor\":\"network\",\"permission\":\"eosio.code\"},\"weight\":1}], \"waits\":[] }" owner -p network
 cleos set contract network contracts/Network Network.wasm -p network@active
 
-cleos push action network setenable '[ true ]' -p network@active
-cleos push action network addreserve '[ "reserve1", true ]' -p network@active
-cleos push action network addreserve '[ "reserve2", true ]' -p network@active
-cleos push action network addreserve '[ "reserve3", true ]' -p network@active
-cleos push action network addreserve '[ "reserve3", false ]' -p network@active
+cleos push action network init '[ "netowner", true ]' -p network@active
+cleos push action network addreserve '[ "reserve1", true ]' -p netowner@active
+cleos push action network addreserve '[ "reserve2", true ]' -p netowner@active
+cleos push action network addreserve '[ "reserve3", true ]' -p netowner@active
+cleos push action network addreserve '[ "reserve3", false ]' -p netowner@active
 
-cleos push action network addreserve '[ "reserve", true ]' -p network@active
+cleos push action network addreserve '[ "reserve", true ]' -p netowner@active
 
-cleos push action network listpairres '[ "reserve", "0.0000 SYS", "eosio.token", true ]' -p network@active
-cleos push action network listpairres '[ "reserve1", "0.0000 SYS", "eosio.token", true ]' -p network@active
-cleos push action network listpairres '[ "reserve2", "0.0000 SYS", "eosio.token", true ]' -p network@active
+cleos push action network listpairres '[ "reserve", "0.0000 SYS", "eosio.token", true ]' -p netowner@active
+cleos push action network listpairres '[ "reserve1", "0.0000 SYS", "eosio.token", true ]' -p netowner@active
+cleos push action network listpairres '[ "reserve2", "0.0000 SYS", "eosio.token", true ]' -p netowner@active
 
-cleos push action network listpairres '[ "reserve1", "0.0000 SYS", "eosio.token", false ]' -p network@active
-cleos push action network listpairres '[ "reserve2", "0.0000 SYS", "eosio.token", false ]' -p network@active
+cleos push action network listpairres '[ "reserve1", "0.0000 SYS", "eosio.token", false ]' -p netowner@active
+cleos push action network listpairres '[ "reserve2", "0.0000 SYS", "eosio.token", false ]' -p netowner@active
 
 cleos get table network network reservespert
 cleos get table reserve reserve rate

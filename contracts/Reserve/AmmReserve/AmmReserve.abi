@@ -1,5 +1,5 @@
 {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Thu Dec 13 11:23:32 2018",
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Mon Dec 17 18:40:08 2018",
     "version": "eosio::abi/1.1",
     "structs": [
         {
@@ -26,6 +26,10 @@
             "name": "init",
             "base": "",
             "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
                 {
                     "name": "network_contract",
                     "type": "name"
@@ -158,6 +162,10 @@
             "base": "",
             "fields": [
                 {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
                     "name": "network_contract",
                     "type": "name"
                 },
@@ -180,6 +188,24 @@
                 {
                     "name": "collected_fees_in_tokens",
                     "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "withdraw",
+            "base": "",
+            "fields": [
+                {
+                    "name": "to",
+                    "type": "name"
+                },
+                {
+                    "name": "quantity",
+                    "type": "asset"
+                },
+                {
+                    "name": "dest_contract",
+                    "type": "name"
                 }
             ]
         }
@@ -219,6 +245,11 @@
         {
             "name": "setparams",
             "type": "setparams",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "withdraw",
+            "type": "withdraw",
             "ricardian_contract": ""
         }
     ],

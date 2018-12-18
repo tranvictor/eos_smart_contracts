@@ -4,7 +4,7 @@ const BigNumber = require('bignumber.js');
 const path = require('path');
 const assert = require('chai').should();
 
-const { ensureContractAssertionError, snooze, getUserBalance, addCodeToPerm} = require('./utils');
+const { ensureContractAssertionError, snooze, getUserBalance, renouncePermToOnlyCode} = require('./utils');
 const reserveServices = require('../scripts/services/ammReserveServices')
 
 const AMOUNT_PRECISON = 0.0001
@@ -44,7 +44,7 @@ before("setup accounts, contracts and initial funds", async () => {
     await tokenData.eos.setabi(tokenData.account, JSON.parse(fs.readFileSync(`contracts/Token/Token.abi`)))
     await reserveData.eos.setcode(reserveData.account, 0, 0, fs.readFileSync(`contracts/Reserve/AmmReserve/AmmReserve.wasm`));
     await reserveData.eos.setabi(reserveData.account, JSON.parse(fs.readFileSync(`contracts/Reserve/AmmReserve/AmmReserve.abi`)))
-    await addCodeToPerm(reserveData.eos, reserveData.account)
+    //await addCodeToPerm(reserveData.eos, reserveData.account)
 
     /* spread initial funds */
     await tokenData.eos.transaction(tokenData.account, myaccount => {
@@ -71,6 +71,9 @@ before("setup accounts, contracts and initial funds", async () => {
         enable_trade: 1,
         },{authorization: `${reserveData.account}@active`});
 
+    /* after init (from reserve contract), renounce permission */
+    await renouncePermToOnlyCode(reserveData.eos, reserveData.account)
+
     const reserveAsOwner = await ownerData.eos.contract(reserveData.account);
     await reserveAsOwner.setparams({
         r: "0.01",
@@ -86,30 +89,6 @@ before("setup accounts, contracts and initial funds", async () => {
 describe('As reserve owner', () => {
 
     xit('init a reserve', async function() {});
-    it('init can not be called twice', async function() {
-        const reserveAsReserve = await reserveData.eos.contract(reserveData.account);
-        const p = reserveAsReserve.init({
-            owner: ownerData.account,
-            network_contract: networkData.account,
-            token: "0.0000 SYS",
-            token_contract: tokenData.account,
-            eos_contract: tokenData.account,
-            enable_trade: 0,
-            },{authorization: `${reserveData.account}@active`});
-        await ensureContractAssertionError(p, "init already called");
-    });
-    it('set params', async function() {
-        const reserveAsOwner = await ownerData.eos.contract(reserveData.account);
-        await reserveAsOwner.setparams({
-            r: "0.01",
-            p_min: "0.05",
-            max_eos_cap_buy: "20.0000 EOS",
-            max_eos_cap_sell: "20.0000 EOS",
-            fee_percent: "0.25",
-            max_sell_rate: "0.5555",
-            min_sell_rate: "0.00000555"
-            },{authorization: `${ownerData.account}@active`});
-    });
     it('set network', async function() {
         const reserveAsOwner = await ownerData.eos.contract(reserveData.account);
         await reserveAsOwner.setnetwork({network_contract: networkData.account},{authorization: `${ownerData.account}@active`});
@@ -147,8 +126,8 @@ describe('As reserve owner', () => {
 
 describe('as non reserve owner', () => {
     it('can not set params', async function() {
-        const reserveAsReserve = await reserveData.eos.contract(reserveData.account);
-        const p = reserveAsReserve.setparams({
+        const reserveAsAlice = await aliceData.eos.contract(reserveData.account);
+        const p = reserveAsAlice.setparams({
             r: "0.02",
             p_min: "0.05",
             max_eos_cap_buy: "20.0000 EOS",
@@ -156,24 +135,24 @@ describe('as non reserve owner', () => {
             fee_percent: "0.25",
             max_sell_rate: "0.5555",
             min_sell_rate: "0.00000555"
-            },{authorization: `${reserveData.account}@active`});
+            },{authorization: `${aliceData.account}@active`});
         await ensureContractAssertionError(p, "Missing required authority");
     });
     it('can not set network', async function() {
-        const reserveAsReserve = await reserveData.eos.contract(reserveData.account);
-        const p = reserveAsReserve.setnetwork({network_contract: networkData.account},{authorization: `${reserveData.account}@active`});
+        const reserveAsAlice = await aliceData.eos.contract(reserveData.account);
+        const p = reserveAsAlice.setnetwork({network_contract: networkData.account},{authorization: `${aliceData.account}@active`});
         await ensureContractAssertionError(p, "Missing required authority");
     });
     xit('can not enable trade', async function() {});
     xit('can not disable trade', async function() {});
     xit('can not reset fee', async function() {});
     it('can not withdraw funds from reserve', async function() {
-        const reserveAsReserve = await reserveData.eos.contract(reserveData.account);
-        const p = reserveAsReserve.withdraw({
+        const reserveAsAlice = await aliceData.eos.contract(reserveData.account);
+        const p = reserveAsAlice.withdraw({
             to:ownerData.account,
             quantity:"23.0000 EOS",
             dest_contract:tokenData.account
-            },{authorization: `${reserveData.account}@active`});
+            },{authorization: `${aliceData.account}@active`});
         await ensureContractAssertionError(p, "Missing required authority");
     });
     it('can not deposit to reserve', async function() {
@@ -278,3 +257,9 @@ describe('As non network', () => {
     });
 })
 
+describe('As reserve', () => {
+    it('can not change reserve code after renouncing ownership', async function() {
+        const p = reserveData.eos.setcode(reserveData.account, 0, 0, fs.readFileSync(`contracts/Reserve/AmmReserve/AmmReserve.wasm`));
+        await ensureContractAssertionError(p, "Provided keys, permissions, and delays do not satisfy declared authorizations");
+    });
+});

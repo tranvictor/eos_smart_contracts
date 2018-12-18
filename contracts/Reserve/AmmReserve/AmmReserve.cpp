@@ -351,14 +351,15 @@ void AmmReserve::record_fees(const struct params_t &current_params,
 void AmmReserve::transfer(name from, name to, asset quantity, string memo) {
 
     if (from == _self) {
-        /* allow this contract to send/withdraw funds (by owner or self). */
+        /* allow this contract to send funds (by code) and withdraw funds (by owner or self).
+         * after self renounces its authorities only owner can withdraw. */
         return;
     }
 
     state_type state_instance(_self, _self.value);
     if (to == _self) {
         if (!state_instance.exists()) {
-            /* if init not called yet allow receiving tokens from anyone*/
+            /* if init not called yet allow anyone to deposit. */
             return;
         }
 

@@ -8,14 +8,12 @@ jleos="cleos -u http://jungle2.cryptolions.io:80"
 PUBLIC_KEY=EOS7qKhbpNCruW5F93FkRSWxoLk2HXJoDyxGU4GD1rKPLTtMvsabC
 ACCOUNT_NAME=lionofcourse
 
-PREFIX="test" #assume 4 digits
-#SUFFIX="$1" #assume 4 digits 
-SUFFIX="aaaa" #assume 4 digits
-TOKEN_ACCOUNT="$PREFIX"toke"$SUFFIX"
-#RESERVE_ACCOUNT="$PREFIX"rese"$SUFFIX"
-RESERVE_ACCOUNT="$PREFIX"rese"aaab"
-NETWORK_ACCOUNT="$PREFIX"netw"$SUFFIX"
-MOSHE_ACCOUNT="$PREFIX"mose"$SUFFIX"
+TOKEN_ACCOUNT="testtokeaaaa"
+RESERVE_ACCOUNT="yolorese1112"
+RESERVE_OWNER_ACCOUNT=lionofcourse
+NETWORK_ACCOUNT="yolonetw1112"
+NETWORK_OWNER_ACCOUNT=lionofcourse
+MOSHE_ACCOUNT="testmoseaaaa"
 EOS_ACCOUNT="eosio.token"
 
 #check network liveness:
@@ -63,11 +61,11 @@ $jleos push action $TOKEN_ACCOUNT issue "[ \"$NETWORK_ACCOUNT\", \"100.0000 SYS\
 #deploy reserve
 $jleos system buyram $ACCOUNT_NAME $RESERVE_ACCOUNT --kbytes 400
 
-$jleos set account permission $RESERVE_ACCOUNT active "{\"threshold\": 1, \"keys\":[{\"key\":\"$PUBLIC_KEY\", \"weight\":1}] , \"accounts\":[{\"permission\":{\"actor\":\"$RESERVE_ACCOUNT\",\"permission\":\"eosio.code\"},\"weight\":1}], \"waits\":[] }" owner -p $RESERVE_ACCOUNT
 $jleos set contract $RESERVE_ACCOUNT contracts/Reserve/AmmReserve AmmReserve.wasm --abi AmmReserve.abi -p $RESERVE_ACCOUNT@active
-
-$jleos push action $RESERVE_ACCOUNT  init "[\"$NETWORK_ACCOUNT\", \"0.0000 SYS\", \"$TOKEN_ACCOUNT\", \"$EOS_ACCOUNT\", true ]" -p $RESERVE_ACCOUNT@active
-$jleos push action $RESERVE_ACCOUNT setparams '[ "0.01", "0.05", "20.0000 EOS", "20.0000 EOS", "0.25", "0.5555", "0.00000555" ]' -p $RESERVE_ACCOUNT@active
+$jleos push action $RESERVE_ACCOUNT  init "[\"$RESERVE_OWNER_ACCOUNT\", \"$NETWORK_ACCOUNT\", \"0.0000 SYS\", \"$TOKEN_ACCOUNT\", \"$EOS_ACCOUNT\", true ]" -p $RESERVE_ACCOUNT@active
+$jleos set account permission $RESERVE_ACCOUNT active "{\"threshold\": 1, \"keys\":[] , \"accounts\":[{\"permission\":{\"actor\":\"$RESERVE_ACCOUNT\",\"permission\":\"eosio.code\"},\"weight\":1}], \"waits\":[] }" -p $RESERVE_ACCOUNT"@owner"
+$jleos set account permission $RESERVE_ACCOUNT owner "{\"threshold\": 1, \"keys\":[] , \"accounts\":[{\"permission\":{\"actor\":\"$RESERVE_ACCOUNT\",\"permission\":\"eosio.code\"},\"weight\":1}], \"waits\":[] }" -p $RESERVE_ACCOUNT"@owner"
+$jleos push action $RESERVE_ACCOUNT setparams '[ "0.01", "0.05", "20.0000 EOS", "20.0000 EOS", "0.25", "0.5555", "0.00000555" ]' -p $RESERVE_OWNER_ACCOUNT@active
 
 # end of deployment, now out trying stuff #
 # get conversion rate
@@ -76,7 +74,6 @@ $jleos get table $RESERVE_ACCOUNT $RESERVE_ACCOUNT rate
 
 # complete a reserve trade
 $jleos push action eosio.token transfer "[ \"$NETWORK_ACCOUNT\", \"$RESERVE_ACCOUNT\", \"0.0100 EOS\", \"$MOSHE_ACCOUNT\" ]" -p $NETWORK_ACCOUNT@active
-
 
 exit
 

@@ -12,14 +12,15 @@ CONTRACT AmmReserve : public contract {
         using contract::contract;
 
         TABLE state_t {
+            name        owner;
             name        network_contract;
             asset       token;
             name        token_contract;
             name        eos_contract;
             bool        trade_enabled;
             asset       collected_fees_in_tokens;
-            EOSLIB_SERIALIZE(state_t, (network_contract)(token)(token_contract)(eos_contract)
-                                      (trade_enabled)(collected_fees_in_tokens))
+            EOSLIB_SERIALIZE(state_t, (owner)(network_contract)(token)(token_contract)
+                                      (eos_contract)(trade_enabled)(collected_fees_in_tokens))
         };
 
         TABLE params_t {
@@ -50,7 +51,8 @@ CONTRACT AmmReserve : public contract {
         typedef eosio::singleton<"rate"_n, rate_t> rate_type;
         typedef eosio::multi_index<"rate"_n, rate_t> dummy_rate_for_abi; /* hack until abi generator generates correct name */
 
-        ACTION init(name    network_contract,
+        ACTION init(name    owner,
+                    name    network_contract,
                     asset   token,
                     name    token_contract,
                     name    eos_contract,
@@ -73,6 +75,8 @@ CONTRACT AmmReserve : public contract {
         ACTION resetfee();
 
         ACTION getconvrate(asset src);
+
+        ACTION withdraw(name to, asset quantity, name dest_contract);
 
         void transfer(name from, name to, asset quantity, string memo);
 
@@ -116,7 +120,7 @@ CONTRACT AmmReserve : public contract {
 
         double delta_e_func(const struct params_t &current_params, double e, double delta_t);
 
-        void reserve_trade(name from, asset quantity, string memo, name code);
+        void reserve_trade(name from, asset quantity, string memo, name code, state_t &current_state);
 
         void do_trade(const struct params_t &current_params,
                       asset src,

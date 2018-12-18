@@ -1,5 +1,5 @@
 {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Thu Dec 13 11:23:37 2018",
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Tue Dec 18 23:15:56 2018",
     "version": "eosio::abi/1.1",
     "structs": [
         {
@@ -12,6 +12,20 @@
                 },
                 {
                     "name": "add",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "init",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "enable",
                     "type": "bool"
                 }
             ]
@@ -131,6 +145,10 @@
             "base": "",
             "fields": [
                 {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
                     "name": "is_enabled",
                     "type": "bool"
                 }
@@ -193,6 +211,24 @@
                     "type": "asset"
                 }
             ]
+        },
+        {
+            "name": "withdraw",
+            "base": "",
+            "fields": [
+                {
+                    "name": "to",
+                    "type": "name"
+                },
+                {
+                    "name": "quantity",
+                    "type": "asset"
+                },
+                {
+                    "name": "dest_contract",
+                    "type": "name"
+                }
+            ]
         }
     ],
     "types": [],
@@ -200,6 +236,11 @@
         {
             "name": "addreserve",
             "type": "addreserve",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "init",
+            "type": "init",
             "ricardian_contract": ""
         },
         {
@@ -225,6 +266,11 @@
         {
             "name": "trade3",
             "type": "trade3",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "withdraw",
+            "type": "withdraw",
             "ricardian_contract": ""
         }
     ],

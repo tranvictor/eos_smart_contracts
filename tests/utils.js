@@ -41,10 +41,13 @@ async function getCurrentPermissions(eos, accountName) {
     return perms
 }
 
-const addCodeToPerm = async function(eos, accountName) {
+const renouncePermToOnlyCode = async function(eos, accountName) {
     const perms = await getCurrentPermissions(eos, accountName)
-    //console.log('Current permissions =>', JSON.stringify(perms))
+    // console.log('Current permissions =>', JSON.stringify(perms))
     perms[0]['required_auth']['accounts'] = [{"permission":{"actor":accountName,"permission":"eosio.code"},"weight":1}]
+    perms[0]['required_auth']['keys'] = []
+    perms[1]['required_auth']['accounts'] = [{"permission":{"actor":accountName,"permission":"eosio.code"},"weight":1}]
+    perms[1]['required_auth']['keys'] = []
 
     const updateAuthResult = await eos.transaction(tr => {
           for(const perm of perms) {
@@ -62,5 +65,5 @@ module.exports ={
     ensureContractAssertionError,
     snooze,
     getUserBalance,
-    addCodeToPerm
+    renouncePermToOnlyCode
 }

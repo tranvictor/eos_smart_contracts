@@ -16,9 +16,10 @@ ACTION Network::init(name owner, bool enable) {
 ACTION Network::setenable(bool enable) {
     state_type state_instance(_self, _self.value);
     eosio_assert(state_instance.exists(), "init not called yet");
-    require_auth(state_instance.get().owner);
 
     auto s = state_instance.get();
+    require_auth(s.owner);
+
     s.is_enabled = enable;
     state_instance.set(s, _self);
 }
@@ -99,9 +100,6 @@ ACTION Network::listpairres(name reserve,
 }
 
 void Network::trade0(name from, name to, asset quantity, string memo) {
-
-    state_type state_table_inst(_self, _self.value);
-    eosio_assert(state_table_inst.exists(), "init not called");
     eosio_assert(memo.length() > 0, "needs a memo with transaction details");
     eosio_assert(quantity.is_valid(), "invalid transfer");
 

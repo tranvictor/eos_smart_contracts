@@ -120,7 +120,7 @@ CONTRACT AmmReserve : public contract {
 
         double delta_e_func(const struct params_t &current_params, double e, double delta_t);
 
-        void reserve_trade(name from, asset quantity, string memo, name code);
+        void reserve_trade(name from, asset quantity, string memo, name code, state_t &current_state);
 
         void do_trade(const struct params_t &current_params,
                       asset src,

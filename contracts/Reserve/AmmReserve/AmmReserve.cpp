@@ -57,9 +57,10 @@ ACTION AmmReserve::setparams(double r,
 ACTION AmmReserve::setnetwork(name network_contract) {
     state_type state_instance(_self, _self.value);
     eosio_assert(state_instance.exists(), "init not called yet");
-    require_auth(state_instance.get().owner);
 
     auto s = state_instance.get();
+    require_auth(s.owner);
+
     s.network_contract = network_contract;
     state_instance.set(s, _self);
 }
@@ -67,9 +68,10 @@ ACTION AmmReserve::setnetwork(name network_contract) {
 ACTION AmmReserve::enabletrade() {
     state_type state_instance(_self, _self.value);
     eosio_assert(state_instance.exists(), "init not called yet");
-    require_auth(state_instance.get().owner);
 
     auto s = state_instance.get();
+    require_auth(s.owner);
+
     s.trade_enabled = true;
     state_instance.set(s, _self);
 }
@@ -77,9 +79,10 @@ ACTION AmmReserve::enabletrade() {
 ACTION AmmReserve::disabletrade() {
     state_type state_instance(_self, _self.value);
     eosio_assert(state_instance.exists(), "init not called yet");
-    require_auth(state_instance.get().owner);
 
     auto s = state_instance.get();
+    require_auth(s.owner);
+
     s.trade_enabled = false;
     state_instance.set(s, _self);
 }
@@ -87,9 +90,10 @@ ACTION AmmReserve::disabletrade() {
 ACTION AmmReserve::resetfee() {
     state_type state_instance(_self, _self.value);
     eosio_assert(state_instance.exists(), "init not called yet");
-    require_auth(state_instance.get().owner);
 
     auto s = state_instance.get();
+    require_auth(s.owner);
+
     s.collected_fees_in_tokens.amount = 0;
     state_instance.set(s, _self);
 }
@@ -255,12 +259,7 @@ double AmmReserve::delta_e_func(const struct params_t &current_params, double e,
     return ((log(1 + current_params.r * p_of_e(current_params, e) * delta_t)) / current_params.r);
 }
 
-void AmmReserve::reserve_trade(name from, asset quantity, string memo, name code) {
-
-    state_type state_instance(_self, _self.value);
-    eosio_assert(state_instance.exists(), "init was not called");
-    auto current_state= state_instance.get(); /* TODO: get as inpuy parameter */
-
+void AmmReserve::reserve_trade(name from, asset quantity, string memo, name code, state_t &current_state) {
     params_type params_instance(_self, _self.value);
     eosio_assert(params_instance.exists(), "params were not set");
     auto current_params = params_instance.get();
@@ -370,7 +369,7 @@ void AmmReserve::transfer(name from, name to, asset quantity, string memo) {
         } else {
             /* only network can perform a trade */
             eosio_assert(from == current_state.network_contract, "not coming from network contract");
-            reserve_trade(from, quantity, memo, _code);
+            reserve_trade(from, quantity, memo, _code, current_state);
             return;
         }
     }
